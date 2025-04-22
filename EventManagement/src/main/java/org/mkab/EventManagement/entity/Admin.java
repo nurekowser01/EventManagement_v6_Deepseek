@@ -3,35 +3,61 @@ package org.mkab.EventManagement.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-@Entity
+import javax.management.relation.Role;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 public class Admin {
-    @Id
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
+
+    // Many-to-many with Jamat
+    @ManyToMany
+    @JoinTable(
+        name = "admin_jamats",
+        joinColumns = @JoinColumn(name = "admin_id"),
+        inverseJoinColumns = @JoinColumn(name = "jamats_id")
+    )
+    private Set<Jamat> jamats = new HashSet<>();
 
     private String username;
     private String password;
     private String name;
     private String email;
-    private String phone;
-    private LocalDate dateOfBirth;
-    private String profileImage;
+    public Admin(Long id, String username, String password, String name, String email, String phone,
+			LocalDate dateOfBirth, String profileImage, Set<Jamat> jamats, Set<Role> roles, boolean isSuperAdmin) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.phone = phone;
+		this.dateOfBirth = dateOfBirth;
+		this.profileImage = profileImage;
+		this.jamats = jamats;
+		this.roles = roles;
+		this.isSuperAdmin = isSuperAdmin;
+	}
 
-    private boolean superAdmin;
+	public Admin() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    private List<String> roles;
-
-	public Integer getId() {
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(Integer id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -91,19 +117,40 @@ public class Admin {
 		this.profileImage = profileImage;
 	}
 
-	public boolean isSuperAdmin() {
-		return superAdmin;
+	public Set<Jamat> getJamats() {
+		return jamats;
 	}
 
-	public void setSuperAdmin(boolean superAdmin) {
-		this.superAdmin = superAdmin;
+	public void setJamats(Set<Jamat> jamats) {
+		this.jamats = jamats;
 	}
 
-	public List<String> getRoles() {
+	public Set<Role> getRoles() {
 		return roles;
 	}
 
-	public void setRoles(List<String> roles) {
+	public void setRoles(Set<Role> roles) {
 		this.roles = roles;
 	}
+
+	public boolean isSuperAdmin() {
+		return isSuperAdmin;
+	}
+
+	public void setSuperAdmin(boolean isSuperAdmin) {
+		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	private String phone;
+    private LocalDate dateOfBirth;
+    private String profileImage; // URL or base64 string
+
+   
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
+
+    private boolean isSuperAdmin;
+
+    // Getters and Setters
 }
