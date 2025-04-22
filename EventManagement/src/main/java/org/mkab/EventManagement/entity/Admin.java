@@ -3,6 +3,7 @@ package org.mkab.EventManagement.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -15,9 +16,130 @@ import javax.management.relation.Role;
 @Entity
 public class Admin {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private String username;
+    private String password;
+    private String name;
+    private String email;
+    private String mobile;
+    private LocalDate dateOfBirth;
+    private String profileImage;
+
+    public Admin(Long id, String username, String password, String name, String email, String mobile,
+			LocalDate dateOfBirth, String profileImage, Boolean isActive, LocalDateTime createdAt,
+			LocalDateTime updatedAt, LocalDateTime lastLoginAt, String lastLoginIp, String notes, Set<Role> roles,
+			Set<Jamat> jamats, String phone, boolean isSuperAdmin) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.mobile = mobile;
+		this.dateOfBirth = dateOfBirth;
+		this.profileImage = profileImage;
+		this.isActive = isActive;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.lastLoginAt = lastLoginAt;
+		this.lastLoginIp = lastLoginIp;
+		this.notes = notes;
+		this.roles = roles;
+		this.jamats = jamats;
+		this.phone = phone;
+		this.isSuperAdmin = isSuperAdmin;
+	}
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	public Boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(Boolean isActive) {
+		this.isActive = isActive;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public LocalDateTime getUpdatedAt() {
+		return updatedAt;
+	}
+
+	public void setUpdatedAt(LocalDateTime updatedAt) {
+		this.updatedAt = updatedAt;
+	}
+
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
+	public String getLastLoginIp() {
+		return lastLoginIp;
+	}
+
+	public void setLastLoginIp(String lastLoginIp) {
+		this.lastLoginIp = lastLoginIp;
+	}
+
+	public String getNotes() {
+		return notes;
+	}
+
+	public void setNotes(String notes) {
+		this.notes = notes;
+	}
+
+	private Boolean isActive = true;
+
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
+    private LocalDateTime lastLoginAt;
+    private String lastLoginIp;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    // Relationships (e.g., Jamat, Roles)
+    // Getters & Setters
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    private Set<Role> roles;
+
+	
 
     // Many-to-many with Jamat
     @ManyToMany
@@ -28,25 +150,7 @@ public class Admin {
     )
     private Set<Jamat> jamats = new HashSet<>();
 
-    private String username;
-    private String password;
-    private String name;
-    private String email;
-    public Admin(Long id, String username, String password, String name, String email, String phone,
-			LocalDate dateOfBirth, String profileImage, Set<Jamat> jamats, Set<Role> roles, boolean isSuperAdmin) {
-		super();
-		this.id = id;
-		this.username = username;
-		this.password = password;
-		this.name = name;
-		this.email = email;
-		this.phone = phone;
-		this.dateOfBirth = dateOfBirth;
-		this.profileImage = profileImage;
-		this.jamats = jamats;
-		this.roles = roles;
-		this.isSuperAdmin = isSuperAdmin;
-	}
+    
 
 	public Admin() {
 		super();
@@ -142,13 +246,9 @@ public class Admin {
 	}
 
 	private String phone;
-    private LocalDate dateOfBirth;
-    private String profileImage; // URL or base64 string
-
+    
    
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+    
 
     private boolean isSuperAdmin;
 

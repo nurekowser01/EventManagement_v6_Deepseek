@@ -28,7 +28,7 @@ public class RunnerAdmin {
              admin.setPassword(passwordEncoder.encode("admin123")); // hashed
              admin.setName("Super Admin");
              admin.setEmail("admin@example.com");
-             admin.setPhone("1234567890");
+             admin.setMobile("1234567890");
              admin.setDateOfBirth(LocalDate.parse("1990-01-01"));
              admin.setProfileImage(null); // optional
 
