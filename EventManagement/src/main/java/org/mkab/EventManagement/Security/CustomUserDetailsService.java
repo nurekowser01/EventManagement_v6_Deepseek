@@ -1,6 +1,6 @@
 package org.mkab.EventManagement.Security;
 
-//CustomUserDetailsService.java
+// CustomUserDetailsService.java
 
 import org.mkab.EventManagement.entity.*;
 import org.mkab.EventManagement.repository.*;
@@ -10,21 +10,31 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
- @Autowired
- private AdminRepository adminRepository;
+    private static final Logger logger = LoggerFactory.getLogger(CustomUserDetailsService.class);
 
- @Override
- public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-     Admin admin = adminRepository.findByUsername(username)
-             .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
-     System.out.println("🔍 Loading user: " + username);
-     return new User(admin.getUsername(), admin.getPassword(), Collections.emptyList());
- }
+    @Autowired
+    private AdminRepository adminRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        logger.info("Attempting to load user by username: {}", username);
+        
+        Admin admin = adminRepository.findByUsername(username)
+                .orElseThrow(() -> {
+                    logger.error("Admin not found for username: {}", username);
+                    return new UsernameNotFoundException("Admin not found");
+                });
+
+        logger.info("Loaded user: {}", admin.getUsername());
+        return new User(admin.getUsername(), admin.getPassword(), Collections.emptyList());
+    }
 
 }

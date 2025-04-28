@@ -1,0 +1,18 @@
+<h2>Admin List</h2>
+<button (click)="router.navigate(['/admin/form'])">Add Admin</button>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Username</th>
+    <th>Email</th>
+    <th>Actions</th>
+  </tr>
+  <tr *ngFor="let admin of admins">
+    <td>{{ admin.name }}</td>
+    <td>{{ admin.username }}</td>
+    <td>{{ admin.email }}</td>
+    <td>
+      <button (click)="deleteAdmin(admin.id)">Delete</button>
+    </td>
+  </tr>
+</table>

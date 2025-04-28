@@ -1,6 +1,21 @@
 import { bootstrapApplication } from '@angular/platform-browser';
-import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
+import { provideRouter } from '@angular/router';
+import { appRoutes } from './app/routes';
+import { importProvidersFrom } from '@angular/core';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';  // Add HTTP_INTERCEPTORS
+import { provideAnimations } from '@angular/platform-browser/animations';
+import { TokenInterceptor } from './app/shared/token.interceptor';  // Import your interceptor
 
-bootstrapApplication(AppComponent, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(appRoutes),
+    importProvidersFrom(HttpClientModule),
+    provideAnimations(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenInterceptor,
+      multi: true
+    }
+  ]
+});

@@ -28,30 +28,7 @@ public class Admin {
     private LocalDate dateOfBirth;
     private String profileImage;
 
-    public Admin(Long id, String username, String password, String name, String email, String mobile,
-			LocalDate dateOfBirth, String profileImage, Boolean isActive, LocalDateTime createdAt,
-			LocalDateTime updatedAt, LocalDateTime lastLoginAt, String lastLoginIp, String notes, Set<Role> roles,
-			Set<Jamat> jamats, String phone, boolean isSuperAdmin) {
-		super();
-		this.id = id;
-		this.username = username;
-		this.password = password;
-		this.name = name;
-		this.email = email;
-		this.mobile = mobile;
-		this.dateOfBirth = dateOfBirth;
-		this.profileImage = profileImage;
-		this.isActive = isActive;
-		this.createdAt = createdAt;
-		this.updatedAt = updatedAt;
-		this.lastLoginAt = lastLoginAt;
-		this.lastLoginIp = lastLoginIp;
-		this.notes = notes;
-		this.roles = roles;
-		this.jamats = jamats;
-		this.phone = phone;
-		this.isSuperAdmin = isSuperAdmin;
-	}
+    
 
 	public String getMobile() {
 		return mobile;
@@ -135,9 +112,9 @@ public class Admin {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+//    @ElementCollection(fetch = FetchType.EAGER)
+//    @Enumerated(EnumType.STRING)
+//    private Set<Role> roles;
 
 	
 
@@ -196,15 +173,7 @@ public class Admin {
 	public void setEmail(String email) {
 		this.email = email;
 	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
+	
 	public LocalDate getDateOfBirth() {
 		return dateOfBirth;
 	}
@@ -229,24 +198,46 @@ public class Admin {
 		this.jamats = jamats;
 	}
 
-	public Set<Role> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(Set<Role> roles) {
-		this.roles = roles;
-	}
+//	public Set<Role> getRoles() {
+//		return roles;
+//	}
+//
+//	public void setRoles(Set<Role> roles) {
+//		this.roles = roles;
+//	}
 
 	public boolean isSuperAdmin() {
 		return isSuperAdmin;
+	}
+
+	public Admin(Long id, String username, String password, String name, String email, String mobile,
+			LocalDate dateOfBirth, String profileImage, Boolean isActive, LocalDateTime createdAt,
+			LocalDateTime updatedAt, LocalDateTime lastLoginAt, String lastLoginIp, String notes, Set<Jamat> jamats,
+			boolean isSuperAdmin) {
+		super();
+		this.id = id;
+		this.username = username;
+		this.password = password;
+		this.name = name;
+		this.email = email;
+		this.mobile = mobile;
+		this.dateOfBirth = dateOfBirth;
+		this.profileImage = profileImage;
+		this.isActive = isActive;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+		this.lastLoginAt = lastLoginAt;
+		this.lastLoginIp = lastLoginIp;
+		this.notes = notes;
+		this.jamats = jamats;
+		this.isSuperAdmin = isSuperAdmin;
 	}
 
 	public void setSuperAdmin(boolean isSuperAdmin) {
 		this.isSuperAdmin = isSuperAdmin;
 	}
 
-	private String phone;
-    
+	 
    
     
 

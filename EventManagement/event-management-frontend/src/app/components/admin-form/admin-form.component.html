@@ -1,0 +1,9 @@
+<h2>Create Admin</h2>
+<form (ngSubmit)="saveAdmin()">
+  <input type="text" [(ngModel)]="admin.name" name="name" placeholder="Name" required />
+  <input type="text" [(ngModel)]="admin.username" name="username" placeholder="Username" required />
+  <input type="password" [(ngModel)]="admin.password" name="password" placeholder="Password" required />
+  <input type="email" [(ngModel)]="admin.email" name="email" placeholder="Email" required />
+  <input type="text" [(ngModel)]="admin.mobile" name="mobile" placeholder="Mobile" required />
+  <button type="submit">Save</button>
+</form>
