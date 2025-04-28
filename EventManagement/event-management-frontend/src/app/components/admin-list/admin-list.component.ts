@@ -29,4 +29,9 @@ export class AdminListComponent implements OnInit {
       this.loadAdmins();
     });
   }
+
+  editAdmin(id: number) {
+	console.log(id); // Log the ID to check if it's being passed correctly
+    this.router.navigate(['/admin/form', id]);
+  }
 }

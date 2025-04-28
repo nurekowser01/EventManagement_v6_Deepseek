@@ -1,9 +1,49 @@
-<h2>Create Admin</h2>
-<form (ngSubmit)="saveAdmin()">
-  <input type="text" [(ngModel)]="admin.name" name="name" placeholder="Name" required />
-  <input type="text" [(ngModel)]="admin.username" name="username" placeholder="Username" required />
-  <input type="password" [(ngModel)]="admin.password" name="password" placeholder="Password" required />
-  <input type="email" [(ngModel)]="admin.email" name="email" placeholder="Email" required />
-  <input type="text" [(ngModel)]="admin.mobile" name="mobile" placeholder="Mobile" required />
-  <button type="submit">Save</button>
+<form [formGroup]="adminForm" (ngSubmit)="saveAdmin()">
+  <div>
+    <label>Username</label>
+    <input formControlName="username" />
+  </div>
+
+  <div>
+    <label>Password</label>
+    <input type="password" formControlName="password" [disabled]="isEditing && !allowPasswordEdit" />
+    <button *ngIf="isEditing && !allowPasswordEdit" type="button" (click)="enablePasswordEdit()">Change Password</button>
+  </div>
+
+  <div>
+    <label>Name</label>
+    <input formControlName="name" />
+  </div>
+
+  <div>
+    <label>Mobile</label>
+    <input formControlName="mobile" />
+  </div>
+
+  <div>
+    <label>Email</label>
+    <input type="email" formControlName="email" />
+  </div>
+
+  <div>
+    <label>Date of Birth</label>
+    <input type="date" formControlName="dateOfBirth" />
+  </div>
+
+  <div>
+    <label>Profile Image URL</label>
+    <input formControlName="profileImageUrl" />
+  </div>
+
+  <div>
+    <label>Is Active</label>
+    <input type="checkbox" formControlName="isActive" />
+  </div>
+
+  <div>
+    <label>Notes</label>
+    <textarea formControlName="notes"></textarea>
+  </div>
+
+  <button type="submit" [disabled]="adminForm.invalid">Save Admin</button>
 </form>

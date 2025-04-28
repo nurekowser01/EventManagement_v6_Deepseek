@@ -1,5 +1,6 @@
 <h2>Admin List</h2>
 <button (click)="router.navigate(['/admin/form'])">Add Admin</button>
+
 <table>
   <tr>
     <th>Name</th>
@@ -12,6 +13,7 @@
     <td>{{ admin.username }}</td>
     <td>{{ admin.email }}</td>
     <td>
+      <button (click)="editAdmin(admin.id)">Edit</button> <!-- Edit button -->
       <button (click)="deleteAdmin(admin.id)">Delete</button>
     </td>
   </tr>
