@@ -20,13 +20,17 @@ export class AdminService {
   }
 
   saveAdmin(admin: Admin): Observable<Admin> {
-    const adminData = { ...admin };
-    delete adminData.id; // Safely remove id before create
-
-    return admin.id 
-      ? this.http.put<Admin>(`${this.apiUrl}/${admin.id}`, adminData)  // Update
-      : this.http.post<Admin>(this.apiUrl, adminData);                 // Create
+    if (admin.id) {
+      // Update – send full object including id
+      return this.http.put<Admin>(`${this.apiUrl}/${admin.id}`, admin);
+    } else {
+      // Create – remove id before sending
+      const adminData = { ...admin };
+      delete adminData.id;
+      return this.http.post<Admin>(this.apiUrl, adminData);
+    }
   }
+
 
   deleteAdmin(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);

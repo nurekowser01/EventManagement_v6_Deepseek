@@ -48,13 +48,18 @@ public class AdminService {
         admin.setDateOfBirth(dto.getDateOfBirth());
         admin.setProfileImage(dto.getProfileImage());
         admin.setSuperAdmin(dto.isSuperAdmin());
+        admin.setIsActive(dto.getIsActive());
+        admin.setNotes(dto.getNotes());
+        admin.setLastLoginAt(dto.getLastLoginAt());
+        admin.setLastLoginIp(dto.getLastLoginIp());
 
-        if (dto.getJamatIds() != null && !dto.getJamatIds().isEmpty()) {
-            Set<Jamat> jamats = new HashSet<>(jamatRepo.findAllById(dto.getJamatIds()));
-            admin.setJamats(jamats);
-        } else {
-            admin.setJamats(new HashSet<>());
-        }
+
+//        if (dto.getJamatIds() != null && !dto.getJamatIds().isEmpty()) {
+//            Set<Jamat> jamats = new HashSet<>(jamatRepo.findAllById(dto.getJamatIds()));
+//            admin.setJamats(jamats);
+//        } else {
+//            admin.setJamats(new HashSet<>());
+//        }
 
         Admin saved = adminRepo.save(admin);
         return mapToResponseDTO(saved);
@@ -71,6 +76,10 @@ public class AdminService {
         admin.setDateOfBirth(dto.getDateOfBirth());
         admin.setProfileImage(dto.getProfileImage());
         admin.setSuperAdmin(dto.isSuperAdmin());
+        admin.setIsActive(dto.getIsActive());
+        admin.setNotes(dto.getNotes());
+        admin.setLastLoginAt(dto.getLastLoginAt());
+        admin.setLastLoginIp(dto.getLastLoginIp());
 
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             admin.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -111,10 +120,15 @@ public class AdminService {
         dto.setUsername(admin.getUsername());
         dto.setName(admin.getName());
         dto.setEmail(admin.getEmail());
-        admin.setMobile(dto.getMobile());
+        admin.setMobile(admin.getMobile());
         dto.setDateOfBirth(admin.getDateOfBirth());
         dto.setProfileImage(admin.getProfileImage());
         dto.setSuperAdmin(admin.isSuperAdmin());
+        dto.setIsActive(admin.getIsActive());
+        dto.setNotes(admin.getNotes());
+        dto.setLastLoginAt(admin.getLastLoginAt());
+        dto.setLastLoginIp(admin.getLastLoginIp());
+
 //        dto.setRoles(admin.getRoles().stream()
 //            .map(role -> new RoleDTO(role.getName()))  // Assuming RoleDTO has a constructor that takes a name
 //            .collect(Collectors.toList()));

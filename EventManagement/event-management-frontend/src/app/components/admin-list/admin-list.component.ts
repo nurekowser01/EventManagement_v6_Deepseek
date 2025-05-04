@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AdminService } from '../../services/admin.service';
 import { Router } from '@angular/router';
+import { Admin } from '../../models/admin.model';
 
 @Component({
   selector: 'app-admin-list',
@@ -34,4 +35,14 @@ export class AdminListComponent implements OnInit {
 	console.log(id); // Log the ID to check if it's being passed correctly
     this.router.navigate(['/admin/form', id]);
   }
+  
+  trackById(index: number, admin: Admin): number | undefined {
+    return admin.id;
+  }
+  
+  addAdmin() {
+    this.router.navigate(['/admin/form']);
+  }
+
+
 }

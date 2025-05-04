@@ -1,20 +1,49 @@
-<h2>Admin List</h2>
-<button (click)="router.navigate(['/admin/form'])">Add Admin</button>
+
+<!-- Add New Admin Button -->
+<div style="margin-bottom: 16px;">
+  <button (click)="addAdmin()" class="btn btn-primary">Add New Admin</button>
+</div>
 
 <table>
-  <tr>
-    <th>Name</th>
-    <th>Username</th>
-    <th>Email</th>
-    <th>Actions</th>
-  </tr>
-  <tr *ngFor="let admin of admins">
-    <td>{{ admin.name }}</td>
-    <td>{{ admin.username }}</td>
-    <td>{{ admin.email }}</td>
-    <td>
-      <button (click)="editAdmin(admin.id)">Edit</button> <!-- Edit button -->
-      <button (click)="deleteAdmin(admin.id)">Delete</button>
-    </td>
-  </tr>
+
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Username</th>
+      <th>Email</th>
+      <th>Mobile</th>
+      <th>Date of Birth</th>
+      <th>Profile Image</th>
+      <th>Active</th>
+      <th>Created At</th>
+      <th>Updated At</th>
+      <th>Last Login</th>
+      <th>Last Login IP</th>
+      <th>Notes</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let admin of admins; trackBy: trackById">
+      <td>{{ admin.name }}</td>
+      <td>{{ admin.username }}</td>
+      <td>{{ admin.email }}</td>
+      <td>{{ admin.mobile }}</td>
+      <td>{{ admin.dateOfBirth }}</td>
+      <td>
+        <img *ngIf="admin.profileImageUrl" [src]="admin.profileImageUrl" alt="Profile" width="50" />
+      </td>
+      <td>{{ admin.isActive ? 'Yes' : 'No' }}</td>
+      <td>{{ admin.createdAt }}</td>
+      <td>{{ admin.updatedAt }}</td>
+      <td>{{ admin.lastLoginAt }}</td>
+      <td>{{ admin.lastLoginIp }}</td>
+      <td>{{ admin.notes }}</td>
+      <td>
+        <button (click)="editAdmin(admin.id)">Edit</button>
+        <button (click)="deleteAdmin(admin.id)">Delete</button>
+        
+      </td>
+    </tr>
+  </tbody>
 </table>
