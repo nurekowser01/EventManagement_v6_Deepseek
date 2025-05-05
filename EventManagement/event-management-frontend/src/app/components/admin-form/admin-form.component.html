@@ -1,49 +1,51 @@
-<form [formGroup]="adminForm" (ngSubmit)="saveAdmin()">
-  <div>
-    <label>Username</label>
-    <input formControlName="username" />
-  </div>
+<form [formGroup]="adminForm" (ngSubmit)="saveAdmin()" class="admin-form">
 
-  <div>
-    <label>Password</label>
-    <input type="password" formControlName="password" [disabled]="isEditing && !allowPasswordEdit" />
-    <button *ngIf="isEditing && !allowPasswordEdit" type="button" (click)="enablePasswordEdit()">Change Password</button>
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Username</mat-label>
+    <input matInput formControlName="username" />
+  </mat-form-field>
 
-  <div>
-    <label>Name</label>
-    <input formControlName="name" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password" [disabled]="isEditing && !allowPasswordEdit" />
+    <button mat-button *ngIf="isEditing && !allowPasswordEdit" type="button" (click)="enablePasswordEdit()">Change Password</button>
+  </mat-form-field>
 
-  <div>
-    <label>Mobile</label>
-    <input formControlName="mobile" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Name</mat-label>
+    <input matInput formControlName="name" />
+  </mat-form-field>
 
-  <div>
-    <label>Email</label>
-    <input type="email" formControlName="email" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Mobile</mat-label>
+    <input matInput formControlName="mobile" />
+  </mat-form-field>
 
-  <div>
-    <label>Date of Birth</label>
-    <input type="date" formControlName="dateOfBirth" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Email</mat-label>
+    <input matInput type="email" formControlName="email" />
+  </mat-form-field>
 
-  <div>
-    <label>Profile Image URL</label>
-    <input formControlName="profileImageUrl" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Date of Birth</mat-label>
+    <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
 
-  <div>
-    <label>Is Active</label>
-    <input type="checkbox" formControlName="isActive" />
-  </div>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Profile Image URL</mat-label>
+    <input matInput formControlName="profileImageUrl" />
+  </mat-form-field>
 
-  <div>
-    <label>Notes</label>
-    <textarea formControlName="notes"></textarea>
-  </div>
+  <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
 
-  <button type="submit" [disabled]="adminForm.invalid">Save Admin</button>
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Notes</mat-label>
+    <textarea matInput formControlName="notes"></textarea>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" type="submit" [disabled]="adminForm.invalid">
+    Save Admin
+  </button>
 </form>

@@ -5,12 +5,20 @@ import { AdminService } from '../../services/admin.service';
 import { Admin } from '../../models/admin.model';
 import { ReactiveFormsModule } from '@angular/forms'; 
 import { CommonModule } from '@angular/common'; // <-- Import CommonModule
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 
 @Component({
   selector: 'app-admin-form',
   standalone: true,
   templateUrl: './admin-form.component.html',
-  imports: [ReactiveFormsModule, CommonModule] // <-- Add CommonModule here
+  imports: [ReactiveFormsModule, CommonModule, MatFormFieldModule, MatButtonModule, MatCheckboxModule,
+	MatDatepickerModule, MatNativeDateModule, MatInputModule
+  ] // <-- Add CommonModule here
 })
 export class AdminFormComponent implements OnInit {
   adminForm: FormGroup;

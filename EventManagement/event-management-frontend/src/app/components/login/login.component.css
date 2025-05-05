@@ -1,0 +1,31 @@
+/* Make sure body and html take full height */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Center the form in the middle of the page */
+.login-container {
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
+  height: 100vh;            /* Full viewport height */
+  width: 100%;              /* Full viewport width */
+}
+
+/* Styling for the login card */
+.login-card {
+  width: 100%;
+  max-width: 400px;         /* Limit the card width */
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Optional: adds shadow */
+  border-radius: 8px; /* Optional: rounded corners */
+}
+
+mat-card-header {
+  text-align: center;
+}
+
+button.full-width {
+  width: 100%; /* Make the button take full width */
+}

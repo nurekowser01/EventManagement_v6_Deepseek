@@ -1,9 +1,10 @@
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './components/layout/layout.component';
 
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'dashboard',
     pathMatch: 'full'
   },
   {
@@ -12,23 +13,33 @@ export const routes: Routes = [
       import('./components/login/login.component').then(m => m.LoginComponent)
   },
   {
-    path: 'admin/list',
-    loadComponent: () =>
-      import('./components/admin-list/admin-list.component').then(m => m.AdminListComponent)
+    path: '',
+    component: LayoutComponent,
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'admin/list',
+        loadComponent: () =>
+          import('./components/admin-list/admin-list.component').then(m => m.AdminListComponent)
+      },
+      {
+        path: 'admin/form',
+        loadComponent: () =>
+          import('./components/admin-form/admin-form.component').then(m => m.AdminFormComponent)
+      },
+      {
+        path: 'admin/form/:id',
+        loadComponent: () =>
+          import('./components/admin-form/admin-form.component').then(m => m.AdminFormComponent)
+      }
+    ]
   },
   {
-    path: 'admin/form',
-    loadComponent: () =>
-      import('./components/admin-form/admin-form.component').then(m => m.AdminFormComponent)
-  },
-  {
-    path: 'admin/form/:id',
-    loadComponent: () =>
-      import('./components/admin-form/admin-form.component').then(m => m.AdminFormComponent)
-  },
-  {
-    path: '**',  // Fallback route
+    path: '**',
     redirectTo: 'login'
   }
 ];
-

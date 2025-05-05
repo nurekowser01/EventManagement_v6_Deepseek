@@ -1,6 +1,26 @@
-<h2>Login</h2>
-<form (ngSubmit)="login()">
-  <input type="text" [(ngModel)]="username" name="username" placeholder="Username" required />
-  <input type="password" [(ngModel)]="password" name="password" placeholder="Password" required />
-  <button type="submit">Login</button>
-</form>
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Admin Login</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Username</mat-label>
+          <input matInput formControlName="username" placeholder="Enter username" />
+          <mat-icon matSuffix>person</mat-icon> <!-- Correctly added icon -->
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input matInput type="password" formControlName="password" placeholder="Enter password" />
+          <mat-icon matSuffix>lock</mat-icon> <!-- Correctly added icon -->
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" class="full-width" type="submit" [disabled]="loginForm.invalid">
+          Login
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
