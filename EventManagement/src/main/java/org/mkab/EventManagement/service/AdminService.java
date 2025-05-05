@@ -120,20 +120,26 @@ public class AdminService {
         dto.setUsername(admin.getUsername());
         dto.setName(admin.getName());
         dto.setEmail(admin.getEmail());
-        admin.setMobile(admin.getMobile());
+        dto.setMobile(admin.getMobile()); // ✅ Corrected
         dto.setDateOfBirth(admin.getDateOfBirth());
         dto.setProfileImage(admin.getProfileImage());
         dto.setSuperAdmin(admin.isSuperAdmin());
         dto.setIsActive(admin.getIsActive());
         dto.setNotes(admin.getNotes());
-        dto.setLastLoginAt(admin.getLastLoginAt());
+        
         dto.setLastLoginIp(admin.getLastLoginIp());
+        dto.setLastLoginAt(admin.getLastLoginAt());
+        dto.setCreatedAt(admin.getCreatedAt());
+        dto.setUpdatedAt(admin.getUpdatedAt());
+        
+        // Uncomment if you want to return roles:
+        // dto.setRoles(admin.getRoles().stream()
+        //     .map(role -> new RoleDTO(role.getName()))
+        //     .collect(Collectors.toList()));
 
-//        dto.setRoles(admin.getRoles().stream()
-//            .map(role -> new RoleDTO(role.getName()))  // Assuming RoleDTO has a constructor that takes a name
-//            .collect(Collectors.toList()));
         return dto;
     }
+
     
  // Delete an Admin by ID
     public void deleteAdmin(Long id) {

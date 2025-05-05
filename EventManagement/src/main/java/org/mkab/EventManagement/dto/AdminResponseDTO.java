@@ -17,6 +17,10 @@ public class AdminResponseDTO {
     private String profileImage;
     private Set<String> jamatNames;
     private boolean isSuperAdmin;
+    
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+    
 
     // ✅ NEW FIELDS
     private Boolean isActive;

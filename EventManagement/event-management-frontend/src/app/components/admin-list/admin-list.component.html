@@ -34,8 +34,8 @@
         <img *ngIf="admin.profileImageUrl" [src]="admin.profileImageUrl" alt="Profile" width="50" />
       </td>
       <td>{{ admin.isActive ? 'Yes' : 'No' }}</td>
-      <td>{{ admin.createdAt }}</td>
-      <td>{{ admin.updatedAt }}</td>
+      <td>{{ admin.createdAt | date:'short' }}</td>
+  	<td>{{ admin.updatedAt | date:'short' }}</td>
       <td>{{ admin.lastLoginAt }}</td>
       <td>{{ admin.lastLoginIp }}</td>
       <td>{{ admin.notes }}</td>
