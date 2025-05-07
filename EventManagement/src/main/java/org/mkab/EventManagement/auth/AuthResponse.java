@@ -2,7 +2,6 @@ package org.mkab.EventManagement.auth;
 
 //AuthResponse.java
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
