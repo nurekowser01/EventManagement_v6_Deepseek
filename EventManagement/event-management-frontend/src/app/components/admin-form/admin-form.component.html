@@ -1,51 +1,80 @@
-<form [formGroup]="adminForm" (ngSubmit)="saveAdmin()" class="admin-form">
+<mat-card class="admin-edit-card">
+  
+  <!-- Profile Image Upload and Preview -->
+<div class="profile-container">
+  <img
+  [src]="imagePreview || (admin?.profileImage && backendUrl + admin.profileImage) || 'assets/avatar.png'"
+  alt="Profile"
+  class="profile-img"
+  
+/>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Username</mat-label>
-    <input matInput formControlName="username" />
-  </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Password</mat-label>
-    <input matInput type="password" formControlName="password" [disabled]="isEditing && !allowPasswordEdit" />
-    <button mat-button *ngIf="isEditing && !allowPasswordEdit" type="button" (click)="enablePasswordEdit()">Change Password</button>
-  </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Name</mat-label>
-    <input matInput formControlName="name" />
-  </mat-form-field>
+  <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+</div>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Mobile</mat-label>
-    <input matInput formControlName="mobile" />
-  </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Email</mat-label>
-    <input matInput type="email" formControlName="email" />
-  </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Date of Birth</mat-label>
-    <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" />
-    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-    <mat-datepicker #picker></mat-datepicker>
-  </mat-form-field>
+  <div class="form-header">
+    <h2>{{ isEditing ? 'Edit Admin' : 'Create Admin' }}</h2>
+    <button mat-raised-button color="primary" (click)="onSubmit()">Save</button>
+  </div>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Profile Image URL</mat-label>
-    <input matInput formControlName="profileImageUrl" />
-  </mat-form-field>
+  <mat-divider></mat-divider>
 
-  <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
+  <form [formGroup]="adminForm" class="admin-form-grid">
+    <!-- LEFT COLUMN -->
+    <div class="form-column">
+      <mat-form-field appearance="fill">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" />
+      </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Notes</mat-label>
-    <textarea matInput formControlName="notes"></textarea>
-  </mat-form-field>
+      <mat-form-field appearance="fill">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" />
+      </mat-form-field>
 
-  <button mat-raised-button color="primary" type="submit" [disabled]="adminForm.invalid">
-    Save Admin
-  </button>
-</form>
+      <mat-form-field appearance="fill">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Mobile</mat-label>
+        <input matInput formControlName="mobile" />
+      </mat-form-field>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="form-column">
+      <mat-form-field appearance="fill">
+        <mat-label>Date of Birth</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dateOfBirth" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Profile Image URL</mat-label>
+        <input matInput formControlName="profileImage"  />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Password</mat-label>
+        <input matInput formControlName="password" [type]="'password'" />
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
+    </div>
+
+    <!-- FULL WIDTH NOTES -->
+    <div class="form-full">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-card>

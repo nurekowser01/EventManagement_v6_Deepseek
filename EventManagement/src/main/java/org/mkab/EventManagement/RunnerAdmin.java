@@ -22,10 +22,10 @@ public class RunnerAdmin {
  @Bean
  CommandLineRunner initAdmin(AdminRepository adminRepository) {
      return args -> {
-         if (adminRepository.findByUsername("superadmin").isEmpty()) {
+         if (adminRepository.findByUsername("admin").isEmpty()) {
              Admin admin = new Admin();
-             admin.setUsername("superadmin");
-             admin.setPassword(passwordEncoder.encode("admin123")); // hashed
+             admin.setUsername("admin");
+             admin.setPassword(passwordEncoder.encode("123")); // hashed
              admin.setName("Super Admin");
              admin.setEmail("admin@example.com");
              admin.setMobile("1234567890");

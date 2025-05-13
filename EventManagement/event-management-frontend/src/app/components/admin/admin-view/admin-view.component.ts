@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
+import { environment } from '../../../../environments/environment';
 
 
 @Component({
@@ -18,6 +19,7 @@ import { MatDividerModule } from '@angular/material/divider';
 })
 export class AdminViewComponent implements OnInit {
 	admin!: Admin; // using definite assignment
+	backendUrl = environment.apiBaseUrl;
 
 
   constructor(private route: ActivatedRoute, private adminService: AdminService) {}

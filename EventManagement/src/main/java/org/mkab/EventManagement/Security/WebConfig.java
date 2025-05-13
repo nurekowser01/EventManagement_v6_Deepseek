@@ -2,9 +2,9 @@ package org.mkab.EventManagement.Security;
 
 
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
@@ -18,6 +18,13 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedMethods("GET", "POST", "PUT", "DELETE")  // Allow specific HTTP methods
                 .allowedHeaders("*")  // Allow all headers
                 .allowCredentials(false);  // Allow cookies (if needed)
+    }
+    
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry
+            .addResourceHandler("/uploads/**")
+            .addResourceLocations("file:/home/nurekowser01/Documents/GitHub/EventManagement_v6_Deepseek/EventManagement/uploads/");
     }
 }
 

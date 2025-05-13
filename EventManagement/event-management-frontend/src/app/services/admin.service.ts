@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Admin } from '../models/admin.model';
+import { map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +31,14 @@ export class AdminService {
       return this.http.post<Admin>(this.apiUrl, adminData);
     }
   }
+  
+  uploadProfileImage(adminId: number, formData: FormData): Observable<string> {
+    return this.http.post<{ profileImage: string }>(
+      `${this.apiUrl}/${adminId}/upload-profile-image`,
+      formData
+    ).pipe(map(response => response.profileImage));
+  }
+
 
 
   deleteAdmin(id: number): Observable<void> {

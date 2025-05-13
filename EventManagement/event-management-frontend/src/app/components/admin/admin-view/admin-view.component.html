@@ -1,21 +1,26 @@
 <mat-card class="admin-view-card">
   <div class="header">
     <div class="left">
-      <img *ngIf="admin.profileImageUrl; else avatar" [src]="admin.profileImageUrl || 'assets/avatar-placeholder.png'" alt="Profile" class="profile-img">
+      <img *ngIf="admin.profileImage; else avatar" 
+      [src]="admin.profileImage ? backendUrl + admin.profileImage : 'assets/avatar-placeholder.png'"
+
+      alt="Profile" class="profile-img">
       <ng-template #avatar>
         <img src="assets/avatar-placeholder.png" alt="Avatar" class="profile-img">
       </ng-template>
     </div>
     <div class="right">
       <h2>{{ admin.name }}</h2>
-      <div class="actions">
-        <button mat-stroked-button color="primary">
-          <mat-icon>edit</mat-icon> Edit
-        </button>
-        <button mat-stroked-button color="accent" routerLink="/admins">
-          <mat-icon>arrow_back</mat-icon> Back
-        </button>
-      </div>
+      
+<!--       <div class="actions"> -->
+<!--         <button mat-stroked-button color="primary"> -->
+<!--           <mat-icon>edit</mat-icon> Edit -->
+<!--         </button> -->
+<!--         <button mat-stroked-button color="accent" routerLink="/admins"> -->
+<!--           <mat-icon>arrow_back</mat-icon> Back -->
+<!--         </button> -->
+<!--       </div> -->
+      
     </div>
   </div>
   <mat-divider></mat-divider>

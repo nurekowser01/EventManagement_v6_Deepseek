@@ -19,6 +19,7 @@ import { MatIconModule } from '@angular/material/icon';
 		MatIconModule,MatFormFieldModule, MatInputModule, MatCheckboxModule,MatNativeDateModule,
 		MatButtonModule, MatDatepickerModule],
 	templateUrl: './admin-list.component.html',
+	styleUrl: 'admin-list.component.css'
 })
 export class AdminListComponent implements OnInit {
 	admins: any[] = [];

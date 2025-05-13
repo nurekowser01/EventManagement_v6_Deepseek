@@ -7,7 +7,7 @@ export interface Admin {
   mobile: string;
   email: string;
   dateOfBirth?: string;  // Optional, depending on your backend
-  profileImageUrl?: string;  // Optional field if you have image uploads
+  profileImage?: string;  // Optional field if you have image uploads
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
