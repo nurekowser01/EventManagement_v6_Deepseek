@@ -170,7 +170,7 @@ public class AdminService {
         Admin admin = adminOpt.get();
 
         String uploadDir = "uploads/admins/";
-        String fileName = UUID.randomUUID() + "_" + imageFile.getOriginalFilename();
+        String fileName = adminId.toString();
         File uploadPath = new File(uploadDir);
         if (!uploadPath.exists()) uploadPath.mkdirs();
 

@@ -1,6 +1,8 @@
 package org.mkab.EventManagement.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.mkab.EventManagement.dto.AdminRequestDTO;
 import org.mkab.EventManagement.dto.AdminResponseDTO;
@@ -61,13 +63,31 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
     }
     
-    // Upload Admin Profile Image
     @PostMapping("/{id}/upload-profile-image")
-    public ResponseEntity<String> uploadProfileImage(@PathVariable Long id,
-                                                     @RequestParam("image") MultipartFile imageFile) {
-        String imageUrl = adminService.uploadProfileImage(id, imageFile);
-        return ResponseEntity.ok(imageUrl);
+    public ResponseEntity<Map<String, String>> uploadProfileImage(@PathVariable Long id,
+                                                                  @RequestParam("image") MultipartFile imageFile) {
+        if (imageFile.isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "No file uploaded."));
+        }
+
+        String contentType = imageFile.getContentType();
+        if (!contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Only image files are allowed."));
+        }
+
+        long maxSize = 5 * 1024 * 1024;
+        if (imageFile.getSize() > maxSize) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File size exceeds 5MB."));
+        }
+
+        try {
+            String imageUrl = adminService.uploadProfileImage(id, imageFile);
+            return ResponseEntity.ok(Collections.singletonMap("imageUrl", imageUrl));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
+        }
     }
+
 
     
 }

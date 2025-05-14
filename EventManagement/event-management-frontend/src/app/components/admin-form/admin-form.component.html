@@ -1,19 +1,29 @@
 <mat-card class="admin-edit-card">
   
   <!-- Profile Image Upload and Preview -->
-<div class="profile-container">
+<div class="profile-container" *ngIf="admin">
   <img
-  [src]="imagePreview || (admin?.profileImage && backendUrl + admin.profileImage) || 'assets/avatar.png'"
-  alt="Profile"
-  class="profile-img"
-  
-/>
-
-
+    [src]="imagePreview || (admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar.png')"
+    (error)="onImageError($event)"
+    alt="Profile"
+    class="profile-img" 
+  />
 
   <input type="file" (change)="onFileSelected($event)" accept="image/*" />
 </div>
 
+
+<!-- Image Compression Spinner -->
+<div *ngIf="isCompressing" class="spinner-container">
+  <mat-spinner diameter="30"></mat-spinner>
+  <span>Compressing image...</span>
+</div>
+
+<!-- Save Spinner -->
+<div *ngIf="isSaving" class="spinner-container">
+  <mat-spinner diameter="30"></mat-spinner>
+  <span>Saving...</span>
+</div>
 
 
   <div class="form-header">

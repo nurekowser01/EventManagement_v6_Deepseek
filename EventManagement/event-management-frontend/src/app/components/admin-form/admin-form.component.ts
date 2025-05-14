@@ -15,7 +15,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { environment } from '../../../environments/environment';
-import {  ViewEncapsulation } from '@angular/core';
+import imageCompression from 'browser-image-compression';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
 	selector: 'app-admin-form',
@@ -24,7 +25,7 @@ import {  ViewEncapsulation } from '@angular/core';
 	styleUrls: ['./admin-form.component.css'],
 	imports: [ReactiveFormsModule, CommonModule, MatFormFieldModule, MatButtonModule, MatCheckboxModule,
 		MatDatepickerModule, MatNativeDateModule, MatInputModule,
-		MatIconModule, MatCardModule, MatDividerModule
+		MatIconModule, MatCardModule, MatDividerModule, MatProgressSpinnerModule
 	] // <-- Add CommonModule here
 	
 
@@ -34,13 +35,15 @@ export class AdminFormComponent implements OnInit {
 	adminId?: number;
 	isEditing: boolean = false;  // Initialize with false
 	allowPasswordEdit: boolean = false;  // Initialize with false
-	admin!: Admin; // using definite assignment
-	selectedFile: File | null = null;
+	admin: Admin = {} as Admin;
+	
 	selectedImageFile: File | null = null;
 	imagePreview: string | ArrayBuffer | null = null;
 	backendUrl = environment.apiBaseUrl;
 
-	
+	isCompressing: boolean = false;
+	isSaving: boolean = false;
+
 	constructor(
 		private fb: FormBuilder,
 		private adminService: AdminService,
@@ -86,32 +89,78 @@ export class AdminFormComponent implements OnInit {
 	onFileSelected(event: Event): void {
 	  const fileInput = event.target as HTMLInputElement;
 	  if (fileInput.files && fileInput.files.length > 0) {
-	    this.selectedImageFile = fileInput.files[0];
+	    const file = fileInput.files[0];
 
-	    const reader = new FileReader();
-	    reader.onload = () => {
-	      this.imagePreview = reader.result;
+	    // Check original size
+	    if (file.size > 20 * 1024 * 1024) { // 10MB max for raw input
+	      alert('Image is too large. Please upload an image under 20 MB.');
+	      return;
+	    }
+
+	    this.isCompressing = true;
+
+	    const options = {
+	      maxSizeMB: 2,
+	      maxWidthOrHeight: 1024,
+	      useWebWorker: true
 	    };
-	    reader.readAsDataURL(this.selectedImageFile);
+
+	    imageCompression(file, options)
+	      .then((compressedFile) => {
+	        if (compressedFile.size > 2 * 1024 * 1024) {
+	          alert('Compressed image still exceeds 2MB. Please choose a smaller image.');
+	          this.isCompressing = false;
+	          return;
+	        }
+
+	        this.selectedImageFile = compressedFile;
+
+	        const reader = new FileReader();
+	        reader.onload = () => {
+	          this.imagePreview = reader.result;
+	          this.isCompressing = false;
+	        };
+	        reader.readAsDataURL(compressedFile);
+	      })
+	      .catch((error) => {
+	        console.error('Image compression failed:', error);
+	        this.isCompressing = false;
+	      });
 	  }
 	}
 
+
+	onImageError(event: Event) {
+	  const imgElement = event.target as HTMLImageElement;
+	  imgElement.src = 'assets/avatar.png';
+	}
 	
 
 	uploadProfileImage(): void {
-	  if (!this.selectedFile || !this.adminId) return;
+	  if (!this.selectedImageFile || !this.adminId) return;
 
 	  const formData = new FormData();
-	  formData.append('image', this.selectedFile);
+	  formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
 
+//	  this.adminService.uploadProfileImage(this.adminId, formData).subscribe({
+//	    next: (imageUrl) => {
+//	      this.adminForm.patchValue({ profileImage: imageUrl });
+//	      if (this.admin) this.admin.profileImage = imageUrl;
+//	    },
+//	    error: (err) => console.error('Image upload failed', err),
+//	  });
+	  
 	  this.adminService.uploadProfileImage(this.adminId, formData).subscribe({
-	    next: (imageUrl) => {
-			this.adminForm.patchValue({ profileImage: imageUrl });
-			this.admin.profileImage = imageUrl;
+	    next: (res: any) => {
+	      const imageUrl = res.imageUrl;
+	      console.log('Profile image uploaded:', imageUrl);
+	      this.router.navigate(['/admin/list']);
 	    },
-	    error: (err) => console.error('Image upload failed', err),
+	    
 	  });
+
 	}
+
 	
 	enablePasswordEdit() {
 		this.allowPasswordEdit = true;
@@ -137,96 +186,7 @@ export class AdminFormComponent implements OnInit {
 		});
 	}
 
-	/*onSubmit(): void {
-	  if (this.adminForm.invalid) {
-	    this.adminForm.markAllAsTouched(); // Trigger validation messages
-	    return;
-	  }
-
-	  const adminData: Admin = {
-	    ...this.adminForm.value,
-	    id: this.adminId
-	  };
-
-	  this.adminService.saveAdmin(adminData).subscribe({
-	    next: () => this.router.navigate(['/admin/list']),
-	    error: (err) => console.error('Failed to save admin:', err)
-	  });
-	}*/
-
-
-	/*onSubmit() {
-	  if (this.adminForm.invalid) {
-	    // If the form is invalid, don't proceed.
-	    return;
-	  }
-
-	  // Create the admin object from the form values
-	  const admin: Admin = {
-	    ...this.adminForm.value
-	  };
-
-	  // Check if we are in edit mode and the admin has an existing ID
-	  if (this.isEditing) {
-	    // Update the existing admin
-	    this.adminService.saveAdmin(admin).subscribe((savedAdmin) => {
-	      // If there's a profile image selected, upload it
-	      if (this.selectedImageFile) {
-	        // Ensure the ID is defined before passing to the service
-	        if (savedAdmin.id) {
-	          const formData = new FormData();
-	          formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
-	          this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe(
-	            (imageUrl) => {
-	              // Handle success, maybe update the profile image URL in the form or UI
-	              savedAdmin.profileImageUrl = imageUrl;
-	              console.log('Profile image uploaded successfully!');
-	            },
-	            (error) => {
-	              console.error('Error uploading profile image:', error);
-	            }
-	          );
-	        } else {
-	          console.error('Admin ID is not available for image upload');
-	        }
-	      }
-
-	      // Do something after the admin is saved successfully
-	      console.log('Admin updated successfully:', savedAdmin);
-	    }, (error) => {
-	      console.error('Error saving admin:', error);
-	    });
-	  } else {
-	    // If we are creating a new admin
-	    this.adminService.saveAdmin(admin).subscribe((newAdmin) => {
-	      // If there's a profile image selected, upload it
-	      if (this.selectedImageFile) {
-	        // Ensure the ID is defined before passing to the service
-	        if (newAdmin.id) {
-	          const formData = new FormData();
-	          formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
-	          this.adminService.uploadProfileImage(newAdmin.id, formData).subscribe(
-	            (imageUrl) => {
-	              // Handle success, maybe update the profile image URL in the form or UI
-	              newAdmin.profileImageUrl = imageUrl;
-	              console.log('Profile image uploaded successfully!');
-	            },
-	            (error) => {
-	              console.error('Error uploading profile image:', error);
-	            }
-	          );
-	        } else {
-	          console.error('Admin ID is not available for image upload');
-	        }
-	      }
-
-	      // Do something after the admin is created successfully
-	      console.log('Admin created successfully:', newAdmin);
-	    }, (error) => {
-	      console.error('Error saving new admin:', error);
-	    });
-	  }
-	}*/
+	
 
 	onSubmit() {
 	  if (this.adminForm.invalid) {
@@ -234,12 +194,15 @@ export class AdminFormComponent implements OnInit {
 	    return;
 	  }
 
+	  this.isSaving = true;
+
 	  const admin: Admin = {
-	    ...this.adminForm.value
+	    ...this.adminForm.getRawValue(), // Get raw value to include disabled fields like password
+	    id: this.isEditing ? this.admin.id : undefined
 	  };
 
 	  const save$ = this.isEditing
-	    ? this.adminService.saveAdmin({ ...admin, id: this.admin.id })
+	    ? this.adminService.saveAdmin(admin)
 	    : this.adminService.saveAdmin(admin);
 
 	  save$.subscribe({
@@ -249,18 +212,29 @@ export class AdminFormComponent implements OnInit {
 	        formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
 	        this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
 	          next: (imageUrl) => {
+	            this.isSaving = false;
 	            console.log('Profile image uploaded:', imageUrl);
+	            this.router.navigate(['/admin/list']);
 	          },
-	          error: (err) => console.error('Image upload failed', err)
+	          error: (err) => {
+	            this.isSaving = false;
+	            console.error('Image upload failed', err);
+	            alert('Failed to upload image.');
+	          }
 	        });
+	      } else {
+	        this.isSaving = false;
+	        this.router.navigate(['/admin/list']);
 	      }
-	      this.router.navigate(['/admin/list']);
 	    },
 	    error: (err) => {
+	      this.isSaving = false;
 	      console.error('Failed to save admin:', err);
+	      alert('Failed to save admin.');
 	    }
 	  });
 	}
+
 
 
 	  
