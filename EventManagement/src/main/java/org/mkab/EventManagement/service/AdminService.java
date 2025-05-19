@@ -60,6 +60,8 @@ public class AdminService {
         admin.setNotes(dto.getNotes());
         admin.setLastLoginAt(dto.getLastLoginAt());
         admin.setLastLoginIp(dto.getLastLoginIp());
+        admin.setCreatedAt(dto.getCreatedAt());
+        admin.setUpdatedAt(dto.getUpdatedAt());
 
 
 //        if (dto.getJamatIds() != null && !dto.getJamatIds().isEmpty()) {
@@ -93,6 +95,8 @@ public class AdminService {
         admin.setNotes(dto.getNotes());
         admin.setLastLoginAt(dto.getLastLoginAt());
         admin.setLastLoginIp(dto.getLastLoginIp());
+        admin.setCreatedAt(dto.getCreatedAt());
+        admin.setUpdatedAt(dto.getUpdatedAt());
 
         if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             admin.setPassword(passwordEncoder.encode(dto.getPassword()));
@@ -127,7 +131,6 @@ public class AdminService {
             .orElseThrow(() -> new RuntimeException("Admin not found"));
     }
 
-        // Helper method to map Admin to AdminResponseDTO
     private AdminResponseDTO mapToResponseDTO(Admin admin) {
         AdminResponseDTO dto = new AdminResponseDTO();
         dto.setId(admin.getId());
@@ -142,12 +145,11 @@ public class AdminService {
         dto.setNotes(admin.getNotes());
         dto.setLastLoginAt(admin.getLastLoginAt());
         dto.setLastLoginIp(admin.getLastLoginIp());
-
-//        dto.setRoles(admin.getRoles().stream()
-//            .map(role -> new RoleDTO(role.getName()))  // Assuming RoleDTO has a constructor that takes a name
-//            .collect(Collectors.toList()));
+        dto.setCreatedAt(admin.getCreatedAt());
+        dto.setUpdatedAt(admin.getUpdatedAt());
         return dto;
     }
+
     
  // Delete an Admin by ID
     public void deleteAdmin(Long id) {

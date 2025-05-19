@@ -2,25 +2,13 @@
   <div class="header">
     <div class="left">
       <img [src]="admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar-placeholder.png'"
-     alt="Profile" class="profile-img">
-      <ng-template #avatar>
-        <img src="assets/avatar-placeholder.png" alt="Avatar" class="profile-img">
-      </ng-template>
+        alt="Profile" class="profile-img">
     </div>
     <div class="right">
       <h2>{{ admin.name }}</h2>
-      
-<!--       <div class="actions"> -->
-<!--         <button mat-stroked-button color="primary"> -->
-<!--           <mat-icon>edit</mat-icon> Edit -->
-<!--         </button> -->
-<!--         <button mat-stroked-button color="accent" routerLink="/admins"> -->
-<!--           <mat-icon>arrow_back</mat-icon> Back -->
-<!--         </button> -->
-<!--       </div> -->
-      
     </div>
   </div>
+
   <mat-divider></mat-divider>
 
   <div class="info-grid">
@@ -28,7 +16,9 @@
     <div class="info-item"><strong>Email:</strong> {{ admin.email }}</div>
     <div class="info-item"><strong>Mobile:</strong> {{ admin.mobile }}</div>
     <div class="info-item"><strong>DOB:</strong> {{ admin.dateOfBirth | date }}</div>
-    <div class="info-item"><strong>Last Login:</strong> {{ admin.lastLoginAt | date:'medium' }}</div>
+    <div class="info-item"><strong>Created At:</strong> {{ admin.createdAt | date: 'medium' }}</div>
+    <div class="info-item"><strong>Updated At:</strong> {{ admin.updatedAt | date: 'medium' }}</div>
+    <div class="info-item"><strong>Last Login:</strong> {{ admin.lastLoginAt | date: 'medium' }}</div>
     <div class="info-item"><strong>IP:</strong> {{ admin.lastLoginIp }}</div>
     <div class="info-item full"><strong>Notes:</strong> {{ admin.notes }}</div>
   </div>

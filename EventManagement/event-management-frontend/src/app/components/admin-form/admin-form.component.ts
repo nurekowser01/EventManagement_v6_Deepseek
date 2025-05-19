@@ -52,6 +52,7 @@ export class AdminFormComponent implements OnInit {
   selectedImageFile: File | null = null;
   imagePreview: string | ArrayBuffer | null = null;
   backendUrl = environment.apiBaseUrl;
+  originalImagePreview: string | ArrayBuffer | null = null;
 
   isCompressing = false;
   isSaving = false;
@@ -95,7 +96,9 @@ export class AdminFormComponent implements OnInit {
         this.adminForm.get('confirmPassword')?.disable();
 
         if (admin.profileImage) {
-          this.imagePreview = this.backendUrl + admin.profileImage;
+          
+		  this.imagePreview = this.backendUrl + admin.profileImage;
+		  this.originalImagePreview = this.imagePreview;
         }
       });
     }
@@ -193,7 +196,10 @@ export class AdminFormComponent implements OnInit {
 
     this.adminService.saveAdmin(admin).subscribe({
       next: (savedAdmin) => {
-        if (this.selectedImageFile && savedAdmin.id) {
+		
+		const isImageChanged = this.imagePreview !== this.originalImagePreview;
+
+        if (this.selectedImageFile && isImageChanged && savedAdmin.id) {
           const formData = new FormData();
           formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
           this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
