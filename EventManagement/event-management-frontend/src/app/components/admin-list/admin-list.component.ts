@@ -11,13 +11,18 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { ConfirmDialogComponent } from '../../shared/confirm-dialog/confirm-dialog.component';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+
 
 @Component({
 	selector: 'app-admin-list',
 	standalone: true,
 	imports: [CommonModule, MatTableModule, RouterModule,
 		MatIconModule,MatFormFieldModule, MatInputModule, MatCheckboxModule,MatNativeDateModule,
-		MatButtonModule, MatDatepickerModule],
+		MatButtonModule, MatDatepickerModule, ConfirmDialogComponent, MatDialogModule
+		
+	],
 	templateUrl: './admin-list.component.html',
 	styleUrl: 'admin-list.component.css'
 })
@@ -25,7 +30,10 @@ export class AdminListComponent implements OnInit {
 	admins: any[] = [];
 	displayedColumns: string[] = ['username', 'name', 'email', 'isActive', 'actions'];
 
-	constructor(private adminService: AdminService, public router: Router) { }
+	constructor(private adminService: AdminService, 
+		public router: Router,
+		private dialog: MatDialog
+	) { }
 
 	ngOnInit(): void {
 		this.loadAdmins();
@@ -38,10 +46,19 @@ export class AdminListComponent implements OnInit {
 	}
 
 	deleteAdmin(id: number) {
-		this.adminService.deleteAdmin(id).subscribe(() => {
-			this.loadAdmins();
+		const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+			data: { message: 'Are you sure you want to delete this admin?' }
+		});
+
+		dialogRef.afterClosed().subscribe(result => {
+			if (result) {
+				this.adminService.deleteAdmin(id).subscribe(() => {
+					this.loadAdmins();
+				});
+			}
 		});
 	}
+
 
 	editAdmin(id: number) {
 		console.log(id); // Log the ID to check if it's being passed correctly

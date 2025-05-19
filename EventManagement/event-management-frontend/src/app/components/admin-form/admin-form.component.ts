@@ -202,6 +202,7 @@ export class AdminFormComponent implements OnInit {
         if (this.selectedImageFile && isImageChanged && savedAdmin.id) {
           const formData = new FormData();
           formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
+		  
           this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
             next: () => {
               this.isSaving = false;

@@ -93,8 +93,8 @@ public class AdminService {
         admin.setSuperAdmin(dto.isSuperAdmin());
         admin.setIsActive(dto.getIsActive());
         admin.setNotes(dto.getNotes());
-        admin.setLastLoginAt(dto.getLastLoginAt());
-        admin.setLastLoginIp(dto.getLastLoginIp());
+//        admin.setLastLoginAt(dto.getLastLoginAt());
+//        admin.setLastLoginIp(dto.getLastLoginIp());
         admin.setCreatedAt(dto.getCreatedAt());
         admin.setUpdatedAt(dto.getUpdatedAt());
 
