@@ -22,14 +22,6 @@ export class TokenInterceptor implements HttpInterceptor {
       });
     }
 
-    return next.handle(req).pipe(
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401 || error.status === 403) {
-          this.authService.logout(); // Optional: Clear token/session
-          this.router.navigate(['/login']);
-        }
-        return throwError(() => error);
-      })
-    );
+    return next.handle(req); // no catchError here
   }
 }

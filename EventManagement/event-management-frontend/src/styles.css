@@ -25,3 +25,15 @@ html, body {
   max-width: 400px;
   padding: 2rem;
 }
+.snack-error {
+  background-color: #f44336; /* red */
+  color: white;
+}
+.snack-warn {
+  background-color: #ffa000; /* orange */
+  color: black;
+}
+.snack-success {
+  background-color: #4caf50; /* green */
+  color: white;
+}

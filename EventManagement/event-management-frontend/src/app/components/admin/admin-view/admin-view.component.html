@@ -1,10 +1,8 @@
 <mat-card class="admin-view-card">
   <div class="header">
     <div class="left">
-      <img *ngIf="admin.profileImage; else avatar" 
-      [src]="admin.profileImage ? backendUrl + admin.profileImage : 'assets/avatar-placeholder.png'"
-
-      alt="Profile" class="profile-img">
+      <img [src]="admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar-placeholder.png'"
+     alt="Profile" class="profile-img">
       <ng-template #avatar>
         <img src="assets/avatar-placeholder.png" alt="Avatar" class="profile-img">
       </ng-template>

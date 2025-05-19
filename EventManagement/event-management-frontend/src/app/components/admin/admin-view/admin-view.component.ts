@@ -18,7 +18,20 @@ import { environment } from '../../../../environments/environment';
     imports: [CommonModule, MatDividerModule, MatCardModule, MatIconModule, MatButtonModule],
 })
 export class AdminViewComponent implements OnInit {
-	admin!: Admin; // using definite assignment
+	admin: Admin = {
+	  id: 0,
+	  username: '',
+	  password: '',
+	  name: '',
+	  email: '',
+	  mobile: '',
+	  dateOfBirth: '',
+	  profileImage: '',
+	  isActive: true,
+	  notes: '',
+	  lastLoginAt: '',
+	  lastLoginIp: ''
+	};
 	backendUrl = environment.apiBaseUrl;
 
 

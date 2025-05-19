@@ -51,3 +51,22 @@
 .form-full {
   grid-column: 1 / -1;
 }
+.snackbar-success {
+  background-color: #4caf50; 
+  color: white;
+}
+.snackbar-error {
+  background-color: #f44336; 
+  color: white;
+}
+::ng-deep .snackbar-success {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+::ng-deep .snackbar-error {
+  background-color: #f44336;
+  color: #fff;
+}
+
+

@@ -82,7 +82,8 @@ public class AdminController {
 
         try {
             String imageUrl = adminService.uploadProfileImage(id, imageFile);
-            return ResponseEntity.ok(Collections.singletonMap("imageUrl", imageUrl));
+            return ResponseEntity.ok(Collections.singletonMap("profileImage", imageUrl));
+
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
         }
