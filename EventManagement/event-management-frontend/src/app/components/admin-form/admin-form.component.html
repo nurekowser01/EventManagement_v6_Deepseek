@@ -16,7 +16,6 @@
     <span>{{ isCompressing ? 'Compressing image...' : 'Saving...' }}</span>
   </div>
 
-  <!-- Header and Save Button -->
   <div class="form-header">
     <h2>{{ isEditing ? 'Edit Admin' : 'Create Admin' }}</h2>
     <button mat-raised-button color="primary" (click)="onSubmit()">Save</button>
@@ -24,7 +23,6 @@
 
   <mat-divider></mat-divider>
 
-  <!-- Form Starts -->
   <form [formGroup]="adminForm" class="admin-form-grid">
     <!-- LEFT COLUMN -->
     <div class="form-column">
@@ -63,46 +61,35 @@
         <input matInput formControlName="profileImage" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Password</mat-label>
-        <input
-          matInput
-          [type]="hidePassword ? 'password' : 'text'"
-          formControlName="password"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          (click)="hidePassword = !hidePassword"
-        >
-          <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+      <!-- Show password edit toggle only in edit mode -->
+      <ng-container *ngIf="isEditing && !allowPasswordEdit">
+        <button mat-stroked-button color="accent" (click)="enablePasswordEdit()" type="button">
+          Change Password
         </button>
-      </mat-form-field>
+      </ng-container>
 
-      <mat-form-field appearance="fill">
-        <mat-label>Confirm Password</mat-label>
-        <input
-          matInput
-          [type]="hideConfirmPassword ? 'password' : 'text'"
-          formControlName="confirmPassword"
-        />
-        <button
-          mat-icon-button
-          matSuffix
-          type="button"
-          (click)="hideConfirmPassword = !hideConfirmPassword"
-        >
-          <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
-        </button>
-      </mat-form-field>
+      <!-- Password Fields -->
+      <ng-container *ngIf="!isEditing || allowPasswordEdit">
+        <mat-form-field appearance="fill">
+          <mat-label>Password</mat-label>
+          <input matInput [type]="hidePassword ? 'password' : 'text'" formControlName="password" />
+          <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
 
-      <!-- Password Mismatch Error -->
-      <mat-error
-        *ngIf="adminForm.errors?.['passwordMismatch'] && adminForm.get('confirmPassword')?.touched"
-      >
-        Passwords do not match
-      </mat-error>
+        <mat-form-field appearance="fill">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" formControlName="confirmPassword" />
+          <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword = !hideConfirmPassword">
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-error *ngIf="adminForm.errors?.['passwordMismatch'] && adminForm.get('confirmPassword')?.touched">
+          Passwords do not match
+        </mat-error>
+      </ng-container>
 
       <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
     </div>

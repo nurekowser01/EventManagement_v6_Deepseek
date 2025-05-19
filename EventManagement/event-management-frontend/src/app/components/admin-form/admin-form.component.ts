@@ -1,10 +1,11 @@
+// admin-form.component.ts
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 import { Admin } from '../../models/admin.model';
 import { ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common'; // <-- Import CommonModule
+import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,283 +18,218 @@ import { MatDividerModule } from '@angular/material/divider';
 import { environment } from '../../../environments/environment';
 import imageCompression from 'browser-image-compression';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import {MatSnackBarModule} from '@angular/material/snack-bar';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-	selector: 'app-admin-form',
-	standalone: true,
-	templateUrl: './admin-form.component.html',
-	styleUrls: ['./admin-form.component.css'],
-	imports: [ReactiveFormsModule, CommonModule, MatFormFieldModule, MatButtonModule, MatCheckboxModule,
-		MatDatepickerModule, MatNativeDateModule, MatInputModule, MatSnackBarModule,
-		MatIconModule, MatCardModule, MatDividerModule, MatProgressSpinnerModule, 
-	] // <-- Add CommonModule here
-	
-
+  selector: 'app-admin-form',
+  standalone: true,
+  templateUrl: './admin-form.component.html',
+  styleUrls: ['./admin-form.component.css'],
+  imports: [
+    ReactiveFormsModule,
+    CommonModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    MatSnackBarModule,
+    MatIconModule,
+    MatCardModule,
+    MatDividerModule,
+    MatProgressSpinnerModule
+  ]
 })
 export class AdminFormComponent implements OnInit {
-	adminForm: FormGroup;
-	adminId?: number;
-	isEditing: boolean = false;  // Initialize with false
-	allowPasswordEdit: boolean = false;  // Initialize with false
-	admin: Admin = {} as Admin;
-	
-	selectedImageFile: File | null = null;
-	imagePreview: string | ArrayBuffer | null = null;
-	backendUrl = environment.apiBaseUrl;
+  adminForm: FormGroup;
+  adminId?: number;
+  isEditing = false;
+  allowPasswordEdit = false;
+  admin: Admin = {} as Admin;
 
-	isCompressing: boolean = false;
-	isSaving: boolean = false;
-	hidePassword: boolean = true;
-	hideConfirmPassword: boolean = true;
-	
-	constructor(
-		private fb: FormBuilder,
-		private adminService: AdminService,
-		private router: Router,
-		private route: ActivatedRoute,
-		private snackBar: MatSnackBar
-	) {
-		this.adminForm = this.fb.group({
-		  username: ['', Validators.required],
-		  password: ['', Validators.required],
-		  confirmPassword: ['', Validators.required],
-		  name: ['', Validators.required],
-		  mobile: ['', Validators.required],
-		  email: ['', [Validators.required, Validators.email]],
-		  dateOfBirth: [''],
-		  profileImage: [''],
-		  isActive: [true],
-		  notes: [''],
-		}, { validator: this.passwordsMatchValidator });
-	}
+  selectedImageFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null;
+  backendUrl = environment.apiBaseUrl;
 
-	
-	
-	ngOnInit(): void {
-	  const id = this.route.snapshot.params['id'];
-	  if (id) {
-	    this.isEditing = true;
-		this.adminForm.get('confirmPassword')?.disable();
+  isCompressing = false;
+  isSaving = false;
+  hidePassword = true;
+  hideConfirmPassword = true;
 
-	    this.adminService.getAdminById(+id).subscribe(admin => {
-	      this.admin = admin;
-	      this.adminForm.patchValue(admin);
+  constructor(
+    private fb: FormBuilder,
+    private adminService: AdminService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {
+    this.adminForm = this.fb.group(
+      {
+        username: ['', Validators.required],
+        password: [''],
+        confirmPassword: [''],
+        name: ['', Validators.required],
+        mobile: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        dateOfBirth: [''],
+        profileImage: [''],
+        isActive: [true],
+        notes: ['']
+      },
+      { validators: this.passwordsMatchValidator }
+    );
+  }
 
-	      // Show current image as preview
-		  if (admin.profileImage) {
-		    this.imagePreview = this.backendUrl + admin.profileImage;
-		  }
+  ngOnInit(): void {
+    const id = this.route.snapshot.params['id'];
+    if (id) {
+      this.isEditing = true;
+      this.adminId = +id;
 
-	      // Disable password field when editing
-	      this.adminForm.get('password')?.disable();
-	    });
-	  }
-	}
+      this.adminService.getAdminById(this.adminId).subscribe(admin => {
+        this.admin = admin;
+        this.adminForm.patchValue(admin);
+        this.adminForm.get('password')?.disable();
+        this.adminForm.get('confirmPassword')?.disable();
 
-	passwordsMatchValidator(form: FormGroup) {
-	  const password = form.get('password')?.value;
-	  const confirmPassword = form.get('confirmPassword')?.value;
-	  return password === confirmPassword ? null : { passwordMismatch: true };
-	}
-	
-	onFileSelected(event: Event): void {
-	  const fileInput = event.target as HTMLInputElement;
-	  if (fileInput.files && fileInput.files.length > 0) {
-	    const file = fileInput.files[0];
+        if (admin.profileImage) {
+          this.imagePreview = this.backendUrl + admin.profileImage;
+        }
+      });
+    }
+  }
 
-	    // Check original size
-	    if (file.size > 20 * 1024 * 1024) { // 10MB max for raw input
-			this.snackBar.open('Image is too large. Please upload an image under 20 MB.', 'Close', {
-			  duration: 3000,
-			  panelClass: ['snackbar-error']
-			});
-	      return;
-	    }
+  passwordsMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
 
-	    this.isCompressing = true;
+  enablePasswordEdit() {
+    this.allowPasswordEdit = true;
+    this.adminForm.get('password')?.enable();
+    this.adminForm.get('confirmPassword')?.enable();
+    this.adminForm.get('password')?.setValidators([Validators.required]);
+    this.adminForm.get('confirmPassword')?.setValidators([Validators.required]);
+    this.adminForm.get('password')?.updateValueAndValidity();
+    this.adminForm.get('confirmPassword')?.updateValueAndValidity();
+  }
 
-	    const options = {
-	      maxSizeMB: 2,
-	      maxWidthOrHeight: 1024,
-	      useWebWorker: true
-	    };
+  onFileSelected(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput.files && fileInput.files.length > 0) {
+      const file = fileInput.files[0];
 
-	    imageCompression(file, options)
-	      .then((compressedFile) => {
-	        if (compressedFile.size > 2 * 1024 * 1024) {
-				this.snackBar.open('Compressed image still exceeds 2MB. Please choose a smaller image.', 'Close', {
-				  duration: 3000,
-				  panelClass: ['snackbar-error']
-				});
-	          this.isCompressing = false;
-	          return;
-	        }
+      if (file.size > 20 * 1024 * 1024) {
+        this.snackBar.open('Image is too large. Please upload under 20MB.', 'Close', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+        return;
+      }
 
-	        this.selectedImageFile = compressedFile;
+      this.isCompressing = true;
 
-	        const reader = new FileReader();
-	        reader.onload = () => {
-	          this.imagePreview = reader.result;
-	          this.isCompressing = false;
-	        };
-	        reader.readAsDataURL(compressedFile);
-	      })
-	      .catch((error) => {
-	        console.error('Image compression failed:', error);
-	        this.isCompressing = false;
-	      });
-	  }
-	}
+      const options = {
+        maxSizeMB: 2,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true
+      };
 
+      imageCompression(file, options)
+        .then(compressedFile => {
+          if (compressedFile.size > 2 * 1024 * 1024) {
+            this.snackBar.open('Compressed image still exceeds 2MB.', 'Close', {
+              duration: 3000,
+              panelClass: ['snackbar-error']
+            });
+            this.isCompressing = false;
+            return;
+          }
 
-	onImageError(event: Event) {
-	  const imgElement = event.target as HTMLImageElement;
-	  imgElement.src = 'assets/avatar.png';
-	}
-	
+          this.selectedImageFile = compressedFile;
 
-	uploadProfileImage(): void {
-	  if (!this.selectedImageFile || !this.adminId) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            this.imagePreview = reader.result;
+            this.isCompressing = false;
+          };
+          reader.readAsDataURL(compressedFile);
+        })
+        .catch(error => {
+          console.error('Image compression failed:', error);
+          this.isCompressing = false;
+        });
+    }
+  }
 
-	  const formData = new FormData();
-	  formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
-	  
-	this.adminService.uploadProfileImage(this.adminId, formData).subscribe({
-	  next: (imageUrl) => {
-	    this.snackBar.open('Profile image uploaded successfully!', 'Close', {
-	      duration: 3000,
-	      panelClass: ['snackbar-success']
-	    });
-	    // Optionally update profile image preview here
-	  },
-	  error: (err) => {
-	    this.snackBar.open('Failed to upload profile image. Please try again.', 'Close', {
-	      duration: 3000,
-	      panelClass: ['snackbar-error']
-	    });
-	  }
-	});
+  onImageError(event: Event) {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/avatar.png';
+  }
 
-	}
+  onSubmit() {
+    if (this.adminForm.invalid) {
+      this.adminForm.markAllAsTouched();
+      return;
+    }
 
-	
-	
-	enablePasswordEdit() {
-		this.allowPasswordEdit = true;
-		this.adminForm.get('password')?.enable();  // Allow password field edit
-	}
+    if (this.adminForm.errors?.['passwordMismatch']) {
+      this.snackBar.open('Passwords do not match.', 'Close', {
+        duration: 3000,
+        panelClass: ['snackbar-error']
+      });
+      return;
+    }
 
-	loadAdmin(id: number): void {
-		this.adminService.getAdminById(id).subscribe(admin => {
-			this.adminForm.patchValue({
-				username: admin.username,
-				name: admin.name,
-				mobile: admin.mobile,
-				email: admin.email,
-				dateOfBirth: admin.dateOfBirth,
-				profileImage: admin.profileImage,
-				isActive: admin.isActive ?? true,
-				notes: admin.notes,
-			});
+    this.isSaving = true;
 
-			if (this.isEditing) {
-				this.adminForm.get('password')?.disable();  // Disable password field if editing
-			}
-		});
-	}
+    const admin: Admin = {
+      ...this.adminForm.getRawValue(),
+      id: this.isEditing ? this.admin.id : undefined
+    };
 
-	
-
-	onSubmit() {
-	  if (this.adminForm.invalid) {
-	    this.adminForm.markAllAsTouched();
-	    return;
-	  }
-	  
-	  if (this.adminForm.errors?.['passwordMismatch']) {
-
-	    this.snackBar.open('Passwords do not match.', 'Close', {
-	      duration: 3000,
-	      panelClass: ['snackbar-error']
-	    });
-	    return;
-	  }
-
-	  this.isSaving = true;
-
-	  const admin: Admin = {
-	    ...this.adminForm.getRawValue(), // Get raw value to include disabled fields like password
-	    id: this.isEditing ? this.admin.id : undefined
-	  };
-
-	  const save$ = this.isEditing
-	    ? this.adminService.saveAdmin(admin)
-	    : this.adminService.saveAdmin(admin);
-
-		save$.subscribe({
-		  next: (savedAdmin) => {
-		    if (this.selectedImageFile && savedAdmin.id) {
-		      const formData = new FormData();
-		      formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
-		      this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
-		        next: (imageUrl) => {
-		          this.isSaving = false;
-		          this.snackBar.open('Admin saved and image uploaded successfully!', 'Close', {
-		            duration: 3000,
-		            panelClass: ['snackbar-success']
-		          });
-		          this.router.navigate(['/admin/view', savedAdmin.id]);
-		        },
-		        error: (err) => {
-		          this.isSaving = false;
-		          this.snackBar.open('Admin saved, but image upload failed.', 'Close', {
-		            duration: 3000,
-		            panelClass: ['snackbar-error']
-		          });
-		          this.router.navigate(['/admin/view', savedAdmin.id]);
-		        }
-		      });
-		    } else {
-		      this.isSaving = false;
-		      this.snackBar.open('Admin saved successfully!', 'Close', {
-		        duration: 3000,
-		        panelClass: ['snackbar-success']
-		      });
-		      this.router.navigate(['/admin/view', savedAdmin.id]);
-		    }
-		  },
-		  error: (err) => {
-		    this.isSaving = false;
-		    this.snackBar.open('Failed to save admin.', 'Close', {
-		      duration: 3000,
-		      panelClass: ['snackbar-error']
-		    });
-		  }
-		});
-
-	}
-
-
-
-	  
-	saveAdmin(): void {
-		if (this.adminForm.invalid) {
-			return;
-		}
-
-		const adminData: Admin = {
-			...this.adminForm.value,
-			id: this.adminId
-		};
-
-		this.adminService.saveAdmin(adminData).subscribe(() => {
-			this.snackBar.open('Admin saved successfully!', 'Close', {
-			  duration: 3000,
-			  panelClass: ['snackbar-success']
-			});
-			this.router.navigate(['/admin/view', this.adminId]);
-		});
-	}
+    this.adminService.saveAdmin(admin).subscribe({
+      next: (savedAdmin) => {
+        if (this.selectedImageFile && savedAdmin.id) {
+          const formData = new FormData();
+          formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
+          this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
+            next: () => {
+              this.isSaving = false;
+              this.snackBar.open('Admin saved and image uploaded successfully!', 'Close', {
+                duration: 3000,
+                panelClass: ['snackbar-success']
+              });
+              this.router.navigate(['/admin/view', savedAdmin.id]);
+            },
+            error: () => {
+              this.isSaving = false;
+              this.snackBar.open('Admin saved, but image upload failed.', 'Close', {
+                duration: 3000,
+                panelClass: ['snackbar-error']
+              });
+              this.router.navigate(['/admin/view', savedAdmin.id]);
+            }
+          });
+        } else {
+          this.isSaving = false;
+          this.snackBar.open('Admin saved successfully!', 'Close', {
+            duration: 3000,
+            panelClass: ['snackbar-success']
+          });
+          this.router.navigate(['/admin/view', savedAdmin.id]);
+        }
+      },
+      error: () => {
+        this.isSaving = false;
+        this.snackBar.open('Failed to save admin.', 'Close', {
+          duration: 3000,
+          panelClass: ['snackbar-error']
+        });
+      }
+    });
+  }
 }
