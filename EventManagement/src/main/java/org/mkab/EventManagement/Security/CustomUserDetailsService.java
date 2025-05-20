@@ -33,8 +33,15 @@ public class CustomUserDetailsService implements UserDetailsService {
                     return new UsernameNotFoundException("Admin not found");
                 });
 
-        logger.info("Loaded user: {}", admin.getUsername());
+        if (!admin.getIsActive()) {
+            logger.warn("Login attempt for disabled admin: {}", username);
+            throw new org.springframework.security.authentication.DisabledException("Your account is disabled. Please contact the administrator.");
+        }
+
+        logger.info("Loaded active user: {}", admin.getUsername());
+
         return new User(admin.getUsername(), admin.getPassword(), Collections.emptyList());
     }
+
 
 }

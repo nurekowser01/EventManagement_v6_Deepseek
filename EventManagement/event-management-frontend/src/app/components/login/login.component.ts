@@ -35,7 +35,7 @@ export class LoginComponent {
           this.router.navigate(['/admin/list']);
         },
         (error) => {
-          alert('Login failed.');
+          // alert('Login failed.');
         }
       );
     }

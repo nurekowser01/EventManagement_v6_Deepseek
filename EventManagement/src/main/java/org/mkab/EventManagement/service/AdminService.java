@@ -85,6 +85,8 @@ public class AdminService {
 			throw new RuntimeException("Username already exists");
 		}
 
+		admin.setUsername(dto.getUsername());
+		
 		admin.setName(dto.getName());
 		admin.setEmail(dto.getEmail());
 		admin.setMobile(dto.getMobile());
@@ -105,12 +107,7 @@ public class AdminService {
 			admin.setPassword(passwordEncoder.encode(dto.getPassword()));
 		}
 
-		if (dto.getJamatIds() != null && !dto.getJamatIds().isEmpty()) {
-			Set<Jamat> jamats = new HashSet<>(jamatRepo.findAllById(dto.getJamatIds()));
-			admin.setJamats(jamats);
-		} else {
-			admin.setJamats(new HashSet<>());
-		}
+		
 
 		Admin saved = adminRepo.save(admin);
 		return mapToResponseDTO(saved);
