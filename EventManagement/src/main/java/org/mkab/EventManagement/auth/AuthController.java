@@ -21,48 +21,62 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-    @Autowired
-    private AdminRepository adminRepository;
-    
-    @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request, HttpServletRequest servletRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    request.getUsername(), request.getPassword()
-                )
-            );
+	@Autowired
+	private JwtUtil jwtUtil;
+	@Autowired
+	private AdminRepository adminRepository;
 
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String token = jwtUtil.generateToken(userDetails.getUsername());
+	@PostMapping("/login")
+	public AuthResponse login(@RequestBody AuthRequest request, HttpServletRequest servletRequest) {
+		try {
+			Authentication authentication = authenticationManager.authenticate(
+					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
-            // ✅ Update login time and IP
-            Admin admin = adminRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Admin not found"));
+			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+			String token = jwtUtil.generateToken(userDetails.getUsername());
 
-            admin.setLastLoginAt(LocalDateTime.now());
-            admin.setLastLoginIp(getClientIp(servletRequest));  // Helper method below
-            adminRepository.save(admin);
+			// ✅ Update login time and IP
+			Admin admin = adminRepository.findByUsername(request.getUsername())
+					.orElseThrow(() -> new RuntimeException("Admin not found"));
 
-            return new AuthResponse(token);
+			admin.setLoginAttempts(0);
+			admin.setLastLoginAt(LocalDateTime.now());
+			admin.setLastLoginIp(getClientIp(servletRequest));
+			admin.setUpdatedBy("system"); // or use authenticated user if available
+			admin.setUpdatedAt(LocalDateTime.now());
+			adminRepository.save(admin);
 
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username or password");
-        }
-    }
-    
-    private String getClientIp(HttpServletRequest request) {
-        String xfHeader = request.getHeader("X-Forwarded-For");
-        if (xfHeader == null) {
-            return request.getRemoteAddr();
-        }
-        return xfHeader.split(",")[0]; // in case of multiple IPs
-    }
+			return new AuthResponse(token);
 
+		} catch (AuthenticationException e) {
+			adminRepository.findByUsername(request.getUsername()).ifPresent(admin -> {
+				int attempts = admin.getLoginAttempts() + 1;
+				admin.setLoginAttempts(attempts);
+
+				// Optionally lock account after N attempts
+				if (attempts >= 5) {
+					admin.setIsActive(false); // optional field
+				}
+
+				admin.setUpdatedBy("system");
+				admin.setUpdatedAt(LocalDateTime.now());
+				adminRepository.save(admin);
+			});
+
+			throw new RuntimeException("Invalid username or password");
+		}
+
+	}
+
+	private String getClientIp(HttpServletRequest request) {
+		String xfHeader = request.getHeader("X-Forwarded-For");
+		if (xfHeader == null) {
+			return request.getRemoteAddr();
+		}
+		return xfHeader.split(",")[0]; // in case of multiple IPs
+	}
 
 }

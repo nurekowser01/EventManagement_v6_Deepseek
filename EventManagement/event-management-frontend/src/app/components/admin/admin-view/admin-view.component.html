@@ -20,6 +20,9 @@
     <div class="info-item"><strong>Updated At:</strong> {{ admin.updatedAt | date: 'medium' }}</div>
     <div class="info-item"><strong>Last Login:</strong> {{ admin.lastLoginAt | date: 'medium' }}</div>
     <div class="info-item"><strong>IP:</strong> {{ admin.lastLoginIp }}</div>
+    
+    <div class="info-item"><strong>Created By:</strong> {{ admin.createdBy }}</div>
+    <div class="info-item"><strong>Updated By:</strong> {{ admin.updatedBy }}</div>
     <div class="info-item full"><strong>Notes:</strong> {{ admin.notes }}</div>
   </div>
 </mat-card>

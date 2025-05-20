@@ -61,6 +61,7 @@
         <input matInput formControlName="profileImage" />
       </mat-form-field>
 
+
       <!-- Show password edit toggle only in edit mode -->
       <ng-container *ngIf="isEditing && !allowPasswordEdit">
         <button mat-stroked-button color="accent" (click)="enablePasswordEdit()" type="button">

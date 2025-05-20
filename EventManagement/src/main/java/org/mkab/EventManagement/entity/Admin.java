@@ -40,6 +40,14 @@ public class Admin {
 
     @Column(columnDefinition = "TEXT")
     private String notes;
+    
+    // NEW FIELDS
+    private String createdBy;
+    private String updatedBy;
+
+    private int loginAttempts = 0;
+
+    private LocalDateTime lastPasswordChangeAt;
 
     // Relationships (e.g., Jamat, Roles)
     // Getters & Setters

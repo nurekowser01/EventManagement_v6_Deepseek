@@ -1,15 +1,21 @@
 package org.mkab.EventManagement.controller;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.mkab.EventManagement.dto.AdminRequestDTO;
 import org.mkab.EventManagement.dto.AdminResponseDTO;
+import org.mkab.EventManagement.dto.PasswordChangeRequest;
+import org.mkab.EventManagement.entity.Admin;
+import org.mkab.EventManagement.repository.AdminRepository;
 import org.mkab.EventManagement.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,10 +35,15 @@ public class AdminController {
 
     @Autowired
     private AdminService adminService;
-
+    @Autowired
+    private AdminRepository adminRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @PostMapping
     public ResponseEntity<AdminResponseDTO> create(@RequestBody AdminRequestDTO dto) {
-        return ResponseEntity.ok(adminService.createAdmin(dto));
+    	String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+    	return ResponseEntity.ok(adminService.createAdmin(dto, currentUsername));
     }
 
     @GetMapping
@@ -88,7 +99,7 @@ public class AdminController {
             return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
         }
     }
-
-
+    
+    
     
 }

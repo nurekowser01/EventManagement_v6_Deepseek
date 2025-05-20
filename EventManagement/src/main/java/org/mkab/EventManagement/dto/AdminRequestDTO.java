@@ -28,5 +28,12 @@ public class AdminRequestDTO {
     private LocalDateTime lastLoginAt;
     private String lastLoginIp;
     
+ // NEW FIELDS
+    private String createdBy;
+    private String updatedBy;
+
+    private int loginAttempts = 0;
+
+    private LocalDateTime lastPasswordChangeAt;
    
 }

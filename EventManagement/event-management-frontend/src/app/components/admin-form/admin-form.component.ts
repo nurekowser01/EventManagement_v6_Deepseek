@@ -20,6 +20,7 @@ import imageCompression from 'browser-image-compression';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialogModule , MatDialog} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-admin-form',
@@ -39,7 +40,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatIconModule,
     MatCardModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule, MatDialogModule
   ]
 })
 export class AdminFormComponent implements OnInit {
@@ -64,7 +65,8 @@ export class AdminFormComponent implements OnInit {
     private adminService: AdminService,
     private router: Router,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+	private dialog: MatDialog
   ) {
     this.adminForm = this.fb.group(
       {
@@ -104,6 +106,8 @@ export class AdminFormComponent implements OnInit {
     }
   }
 
+  
+	
   passwordsMatchValidator(form: FormGroup) {
     const password = form.get('password')?.value;
     const confirmPassword = form.get('confirmPassword')?.value;
