@@ -22,6 +22,15 @@ export class TokenInterceptor implements HttpInterceptor {
       });
     }
 
-    return next.handle(req); // no catchError here
+	return next.handle(req).pipe(
+	  catchError((error: HttpErrorResponse) => {
+	    if (error.status === 401) {
+	      // Only redirect on 401 (unauthorized / expired token)
+	      this.authService.logout(); // Clear token
+	      this.router.navigate(['/login']);
+	    }
+	    return throwError(() => error);
+	  })
+	);
   }
 }
