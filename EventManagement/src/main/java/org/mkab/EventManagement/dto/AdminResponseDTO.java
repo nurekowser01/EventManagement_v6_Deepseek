@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 
+import org.mkab.EventManagement.model.enums.RoleType;
+
 import lombok.Data;
 
 @Data
@@ -33,5 +35,5 @@ public class AdminResponseDTO {
     private int loginAttempts = 0;
 
     private LocalDateTime lastPasswordChangeAt;
-    
+    private Set<RoleType> roles;  // or List<RoleType>
 }

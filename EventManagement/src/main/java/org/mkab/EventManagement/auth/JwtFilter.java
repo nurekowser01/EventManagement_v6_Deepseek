@@ -81,8 +81,15 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     // You can improve this method to match your secured endpoint structure
+    
     private boolean requiresAuth(HttpServletRequest request) {
         String path = request.getRequestURI();
-        return !path.startsWith("/api/auth") && !path.startsWith("/swagger") && !path.startsWith("/uploads");
+        return !(
+            path.startsWith("/api/auth") ||
+            path.startsWith("/swagger-ui") || 
+            path.startsWith("/v3/api-docs") ||
+            path.startsWith("/uploads")
+        );
     }
+
 }

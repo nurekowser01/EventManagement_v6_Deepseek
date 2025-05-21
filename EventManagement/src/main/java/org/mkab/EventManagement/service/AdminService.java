@@ -11,13 +11,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.mkab.EventManagement.dto.AdminRequestDTO;
 import org.mkab.EventManagement.dto.AdminResponseDTO;
 import org.mkab.EventManagement.entity.Admin;
-import org.mkab.EventManagement.entity.Jamat;
+import org.mkab.EventManagement.entity.Role;
+import org.mkab.EventManagement.model.enums.RoleType;
 import org.mkab.EventManagement.repository.AdminRepository;
 import org.mkab.EventManagement.repository.JamatRepository;
 import org.mkab.EventManagement.repository.RoleRepository;
@@ -70,6 +70,16 @@ public class AdminService {
 		admin.setLoginAttempts(0);
 		admin.setLastPasswordChangeAt(LocalDateTime.now()); // Optional: or null if never changed
 
+		// Assign roles from dto
+	    Set<Role> roles = new HashSet<>();
+	    if (dto.getRoles() != null && !dto.getRoles().isEmpty()) {
+	        roles = dto.getRoles().stream()
+	                .map(roleType -> roleRepo.findByType(roleType)
+	                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleType)))
+	                .collect(Collectors.toSet());
+	    }
+	    admin.setRoles(roles);
+	    
 		Admin saved = adminRepo.save(admin);
 		return mapToResponseDTO(saved);
 	}
@@ -107,7 +117,15 @@ public class AdminService {
 			admin.setPassword(passwordEncoder.encode(dto.getPassword()));
 		}
 
-		
+		// Update roles
+	    Set<Role> roles = new HashSet<>();
+	    if (dto.getRoles() != null && !dto.getRoles().isEmpty()) {
+	        roles = dto.getRoles().stream()
+	                .map(roleType -> roleRepo.findByType(roleType)
+	                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleType)))
+	                .collect(Collectors.toSet());
+	    }
+	    admin.setRoles(roles);
 
 		Admin saved = adminRepo.save(admin);
 		return mapToResponseDTO(saved);
@@ -142,6 +160,12 @@ public class AdminService {
 		dto.setUpdatedAt(admin.getUpdatedAt());
 		dto.setCreatedBy(admin.getCreatedBy());
 		dto.setUpdatedBy(admin.getUpdatedBy());
+		// Convert roles to RoleType Set (or your preferred format)
+	    Set<RoleType> roleTypes = admin.getRoles().stream()
+	                                  .map(role -> role.getType())
+	                                  .collect(Collectors.toSet());
+	    dto.setRoles(roleTypes);
+	    
 		return dto;
 	}
 

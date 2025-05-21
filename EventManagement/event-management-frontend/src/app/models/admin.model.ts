@@ -1,3 +1,18 @@
+
+export enum RoleType {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+  GUEST = 'GUEST',
+  // Add any other enum values that exist in your backend RoleType
+}
+
+export interface Role {
+  id: number;
+  type: RoleType | string; // Using RoleType enum but also allow string to be flexible
+  details?: string;        // Optional details field
+}
+
 export interface Admin {
 	id?: number;  // id should be optional
 
@@ -16,4 +31,6 @@ export interface Admin {
 	notes?: string;
 	createdBy?: string;
 	updatedBy?: string;
+
+	roles?: Role[];
 }

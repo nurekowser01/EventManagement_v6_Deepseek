@@ -10,6 +10,10 @@ import java.util.Set;
 
 import org.mkab.EventManagement.entity.Role;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
 
 @Data
 @NoArgsConstructor
@@ -64,12 +68,14 @@ public class Admin {
         this.updatedAt = LocalDateTime.now();
     }
 
+    @Schema(hidden = true)
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "admin_roles",
         joinColumns = @JoinColumn(name = "admin_id"),
         inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonIgnore
     private Set<Role> roles;
    
 

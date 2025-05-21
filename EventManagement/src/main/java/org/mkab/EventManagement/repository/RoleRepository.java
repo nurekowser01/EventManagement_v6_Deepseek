@@ -1,7 +1,5 @@
 package org.mkab.EventManagement.repository;
 
-import java.util.Optional;
-
 import org.mkab.EventManagement.entity.Role;
 import org.mkab.EventManagement.model.enums.RoleType;
 import org.springframework.data.jpa.repository.JpaRepository;
