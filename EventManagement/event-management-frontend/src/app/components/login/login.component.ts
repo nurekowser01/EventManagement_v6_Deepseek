@@ -8,36 +8,60 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { Validators } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-login',
-  standalone: true,
-  imports: [MatIconModule, CommonModule, ReactiveFormsModule, MatCardModule, MatInputModule, MatButtonModule, FormsModule],
-  templateUrl: './login.component.html',
+	selector: 'app-login',
+	standalone: true,
+	imports: [MatIconModule, CommonModule, ReactiveFormsModule, MatSnackBarModule,
+		MatCardModule, MatInputModule, MatButtonModule, FormsModule]
+	,
+	templateUrl: './login.component.html',
 })
 export class LoginComponent {
 	loginForm!: FormGroup;
 
-  constructor(private fb: FormBuilder, private authService: AuthService, public router: Router) {}
+	constructor(private fb: FormBuilder, private authService: AuthService,
+		private snackBar: MatSnackBar,
+		public router: Router) { }
 
-  ngOnInit(): void {
-    this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]],
-    });
-  }
+	ngOnInit(): void {
+		this.loginForm = this.fb.group({
+			username: ['', [Validators.required]],
+			password: ['', [Validators.required]],
+		});
+	}
 
-  onLogin(): void {
-    if (this.loginForm.valid) {
-      const { username, password } = this.loginForm.value;
-      this.authService.login(username, password).subscribe(
-        () => {
-          this.router.navigate(['/admin/list']);
-        },
-        (error) => {
-          // alert('Login failed.');
-        }
-      );
-    }
-  }
+	onLogin(): void {
+		if (this.loginForm.valid) {
+			const { username, password } = this.loginForm.value;
+			this.authService.login(username, password).subscribe(
+				() => {
+					this.router.navigate(['/admin/list']);
+				},
+				(error) => {
+				  let errorMessage = 'Login failed. Please try again.';
+				  console.error('Login error:', error);  // No need to JSON.stringify
+
+				  if (error.error) {
+				    if (typeof error.error === 'object' && error.error.error) {
+				      errorMessage = error.error.error; // e.g., "Invalid username or password."
+				    } else if (typeof error.error === 'string') {
+				      errorMessage = error.error;
+				    }
+				  }
+
+				  this.snackBar.open(errorMessage, 'Close', {
+				    duration: 4000,
+				    panelClass: ['mat-warn'],
+				  });
+				}
+
+
+
+
+			);
+		}
+	}
+
 }

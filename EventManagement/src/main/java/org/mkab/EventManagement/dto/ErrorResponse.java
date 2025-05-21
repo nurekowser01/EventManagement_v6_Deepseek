@@ -1,7 +1,9 @@
 package org.mkab.EventManagement.dto;
 
-//package: org.mkab.EventManagement.dto (or anywhere appropriate)
+import lombok.Data;
 
+//package: org.mkab.EventManagement.dto (or anywhere appropriate)
+@Data
 public class ErrorResponse {
  private String error;
 

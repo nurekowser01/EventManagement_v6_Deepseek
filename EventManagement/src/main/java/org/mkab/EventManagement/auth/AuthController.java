@@ -37,14 +37,24 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody AuthRequest request, HttpServletRequest servletRequest) {
 		try {
+			Admin admin = adminRepository.findByUsername(request.getUsername())
+					.orElse(null);
+
+			if (admin == null) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body(new ErrorResponse("Invalid username or password."));
+			}
+
+			if (!Boolean.TRUE.equals(admin.getIsActive())) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+						.body(new ErrorResponse("Your account is disabled. Please contact the administrator."));
+			}
+
 			Authentication authentication = authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
 
 			UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 			String token = jwtUtil.generateToken(userDetails.getUsername());
-
-			Admin admin = adminRepository.findByUsername(request.getUsername())
-					.orElseThrow(() -> new RuntimeException("Admin not found"));
 
 			admin.setLoginAttempts(0);
 			admin.setLastLoginAt(LocalDateTime.now());
@@ -59,23 +69,26 @@ public class AuthController {
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(new ErrorResponse("Your account is disabled. Please contact the administrator."));
 		} catch (AuthenticationException e) {
+			// Increase login attempts
 			adminRepository.findByUsername(request.getUsername()).ifPresent(admin -> {
 				int attempts = admin.getLoginAttempts() + 1;
 				admin.setLoginAttempts(attempts);
-
 				if (attempts >= 5) {
 					admin.setIsActive(false);
 				}
-
 				admin.setUpdatedBy("system");
 				admin.setUpdatedAt(LocalDateTime.now());
 				adminRepository.save(admin);
 			});
-
 			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 					.body(new ErrorResponse("Invalid username or password."));
+		} catch (Exception ex) {
+			// Catch-all for other runtime errors
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new ErrorResponse("Something went wrong. Please try again later."));
 		}
 	}
+
 
 
 	private String getClientIp(HttpServletRequest request) {
