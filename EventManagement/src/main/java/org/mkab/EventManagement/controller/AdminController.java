@@ -14,6 +14,7 @@ import org.mkab.EventManagement.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,73 +34,70 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/admins")
 public class AdminController {
 
-    @Autowired
-    private AdminService adminService;
-    @Autowired
-    private AdminRepository adminRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    
-    @PostMapping
-    public ResponseEntity<AdminResponseDTO> create(@RequestBody AdminRequestDTO dto) {
-    	String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-    	return ResponseEntity.ok(adminService.createAdmin(dto, currentUsername));
-    }
+	@Autowired
+	private AdminService adminService;
+	@Autowired
+	private AdminRepository adminRepository;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-    @GetMapping
-    public List<AdminResponseDTO> getAll() {
-        return adminService.getAllAdmins();
-    }
+	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PostMapping
+	public ResponseEntity<AdminResponseDTO> create(@RequestBody AdminRequestDTO dto) {
+		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		return ResponseEntity.ok(adminService.createAdmin(dto, currentUsername));
+	}
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AdminResponseDTO> get(@PathVariable Long id) {
-        return ResponseEntity.ok(adminService.getAdminById(id));
-    }
+	//@PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+	@GetMapping
+	public List<AdminResponseDTO> getAll() {
+		return adminService.getAllAdmins();
+	}
 
-    @PutMapping("/{id}")
-    public ResponseEntity<AdminResponseDTO> update(@PathVariable Long id, @RequestBody AdminRequestDTO dto) {
-        return ResponseEntity.ok(adminService.updateAdmin(id, dto));
-    }
+	//@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+	@GetMapping("/{id}")
+	public ResponseEntity<AdminResponseDTO> get(@PathVariable Long id) {
+		return ResponseEntity.ok(adminService.getAdminById(id));
+	}
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        adminService.deleteAdmin(id);
-        return ResponseEntity.noContent().build();
-    }
+	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PutMapping("/{id}")
+	public ResponseEntity<AdminResponseDTO> update(@PathVariable Long id, @RequestBody AdminRequestDTO dto) {
+		return ResponseEntity.ok(adminService.updateAdmin(id, dto));
+	}
 
-    // Exception handling: Return a response with an error message when admin is not found
-    @ExceptionHandler(RuntimeException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<String> handleAdminNotFound(RuntimeException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
-    }
-    
-    @PostMapping("/{id}/upload-profile-image")
-    public ResponseEntity<Map<String, String>> uploadProfileImage(@PathVariable Long id,
-                                                                  @RequestParam("image") MultipartFile imageFile) {
-        if (imageFile.isEmpty()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "No file uploaded."));
-        }
+	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		adminService.deleteAdmin(id);
+		return ResponseEntity.noContent().build();
+	}
 
-        String contentType = imageFile.getContentType();
-        if (!contentType.startsWith("image/")) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Only image files are allowed."));
-        }
+	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PostMapping("/{id}/upload-profile-image")
+	public ResponseEntity<Map<String, String>> uploadProfileImage(@PathVariable Long id,
+			@RequestParam("image") MultipartFile imageFile) {
+		if (imageFile.isEmpty()) {
+			return ResponseEntity.badRequest().body(Collections.singletonMap("error", "No file uploaded."));
+		}
 
-        long maxSize = 5 * 1024 * 1024;
-        if (imageFile.getSize() > maxSize) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File size exceeds 5MB."));
-        }
+		String contentType = imageFile.getContentType();
+		if (!contentType.startsWith("image/")) {
+			return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Only image files are allowed."));
+		}
 
-        try {
-            String imageUrl = adminService.uploadProfileImage(id, imageFile);
-            return ResponseEntity.ok(Collections.singletonMap("profileImage", imageUrl));
+		long maxSize = 5 * 1024 * 1024;
+		if (imageFile.getSize() > maxSize) {
+			return ResponseEntity.badRequest().body(Collections.singletonMap("error", "File size exceeds 5MB."));
+		}
 
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
-        }
-    }
-    
-    
-    
+		try {
+			String imageUrl = adminService.uploadProfileImage(id, imageFile);
+			return ResponseEntity.ok(Collections.singletonMap("profileImage", imageUrl));
+
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
+		}
+	}
+
 }

@@ -8,7 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.management.relation.Role;
+import org.mkab.EventManagement.entity.Role;
+
 
 @Data
 @NoArgsConstructor
@@ -63,20 +64,13 @@ public class Admin {
         this.updatedAt = LocalDateTime.now();
     }
 
-//    @ElementCollection(fetch = FetchType.EAGER)
-//    @Enumerated(EnumType.STRING)
-//    private Set<Role> roles;
-
-	
-
-    // Many-to-many with Jamat
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "admin_jamats",
+        name = "admin_roles",
         joinColumns = @JoinColumn(name = "admin_id"),
-        inverseJoinColumns = @JoinColumn(name = "jamats_id")
+        inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    private Set<Jamat> jamats = new HashSet<>();
+    private Set<Role> roles;
    
 
     private boolean isSuperAdmin;

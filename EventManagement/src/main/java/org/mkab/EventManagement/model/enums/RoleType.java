@@ -1,0 +1,22 @@
+package org.mkab.EventManagement.model.enums;
+
+public enum RoleType {
+    SUPER_ADMIN,
+    ADMIN,
+    DATA_ENTRY,
+    DATA_PRINT,
+    CREATE_MEMBER,
+    READ_MEMBER,
+    UPDATE_MEMBER,
+    DELETE_MEMBER,
+    APPROVE_MEMBER,
+    SEARCH_MEMBER,
+    CREATE_EVENT,
+    VIEW_EVENT,
+    UPDATE_EVENT,
+    DELETE_EVENT,
+    REGISTER_MEMBER,
+    PRINT_ID_CARD,
+    PRINT_REPORT,
+    VIEW_REPORT
+}

@@ -40,28 +40,28 @@ export class LoginComponent {
 					this.router.navigate(['/admin/list']);
 				},
 				(error) => {
-				  let errorMessage = 'Login failed. Please try again.';
-				  console.error('Login error:', error);  // No need to JSON.stringify
+					let errorMessage = 'Login failed. Please try again.';
+					console.error('Login error:', error);
 
-				  if (error.error) {
-				    if (typeof error.error === 'object' && error.error.error) {
-				      errorMessage = error.error.error; // e.g., "Invalid username or password."
-				    } else if (typeof error.error === 'string') {
-				      errorMessage = error.error;
-				    }
-				  }
+					// Check if backend returned your structured ApiErrorResponse JSON
+					if (error.error) {
+						// error.error should be your ApiErrorResponse object
+						if (typeof error.error === 'object' && error.error.message) {
+							errorMessage = error.error.message;  // <-- Use the message field
+						} else if (typeof error.error === 'string') {
+							errorMessage = error.error;
+						}
+					}
 
-				  this.snackBar.open(errorMessage, 'Close', {
-				    duration: 4000,
-				    panelClass: ['mat-warn'],
-				  });
+					this.snackBar.open(errorMessage, 'Close', {
+						duration: 4000,
+						panelClass: ['mat-warn'],
+					});
 				}
-
-
-
-
 			);
 		}
 	}
+
+
 
 }

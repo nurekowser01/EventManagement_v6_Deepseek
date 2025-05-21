@@ -26,7 +26,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         logger.info("Attempting to load user by username: {}", username);
-        
+
         Admin admin = adminRepository.findByUsername(username)
                 .orElseThrow(() -> {
                     logger.error("Admin not found for username: {}", username);
@@ -35,13 +35,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         if (!admin.getIsActive()) {
             logger.warn("Login attempt for disabled admin: {}", username);
-            throw new org.springframework.security.authentication.DisabledException("Your account is disabled. Please contact the administrator.");
+            throw new org.springframework.security.authentication.DisabledException("Your account is disabled.");
         }
 
-        logger.info("Loaded active user: {}", admin.getUsername());
-
-        return new User(admin.getUsername(), admin.getPassword(), Collections.emptyList());
+        return new CustomUserDetails(admin);
     }
+
 
 
 }
