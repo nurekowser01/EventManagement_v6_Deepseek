@@ -55,6 +55,7 @@ public class AuthController {
             admin.setLastLoginIp(getClientIp(servletRequest));
             admin.setUpdatedBy("system");
             admin.setUpdatedAt(LocalDateTime.now());
+            
             adminRepository.save(admin);
 
             return ResponseEntity.ok(new AuthResponse(token));
@@ -64,7 +65,7 @@ public class AuthController {
             int attempts = admin.getLoginAttempts() + 1;
             admin.setLoginAttempts(attempts);
 
-            // Disable admin if attempts reach 5
+//             Disable admin if attempts reach 5
             if (attempts >= 5) {
                 admin.setIsActive(false);
             }

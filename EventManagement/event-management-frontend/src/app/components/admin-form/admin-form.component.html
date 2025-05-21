@@ -82,15 +82,21 @@
 
 	<!--     Roles -->
 	<!-- Add this inside your form -->
-	<div class="form-column roles-container">
+	<div class="roles-grid full-width">
 		<label>Roles</label>
-		
-			<mat-form-field appearance="fill" class="full-width">
-			<mat-label>Roles</mat-label> <mat-select formControlName="roles"
-				multiple> <mat-option *ngFor="let role of allRoles"
-				[value]="role.id"> {{ role.type }} </mat-option> </mat-select> </mat-form-field>
 
-		
+		<!-- Custom label instead of mat-form-field -->
+		<label class="mat-subheading-1">Assign Roles</label>
+
+		<!-- Checkbox grid -->
+		<div class="roles-grid">
+			<mat-checkbox *ngFor="let role of allRoles"
+				[checked]="adminForm.get('roles')?.value.includes(role.id)"
+				(change)="onRoleToggle(role.id, $event.checked)"> {{
+			role.type }} </mat-checkbox>
+		</div>
+
+
 	</div>
 
 

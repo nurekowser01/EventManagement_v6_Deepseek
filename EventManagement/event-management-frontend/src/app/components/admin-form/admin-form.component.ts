@@ -1,6 +1,6 @@
 // admin-form.component.ts
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 import { Admin, Role } from '../../models/admin.model';
@@ -22,7 +22,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { RoleService } from '../../services/role.service';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 
 @Component({
 	selector: 'app-admin-form',
@@ -63,6 +63,7 @@ export class AdminFormComponent implements OnInit {
 	hideConfirmPassword = true;
 
 	allRoles: Role[] = []; // all available roles from backend or hardcoded
+	rolesControl!: FormControl;
 	
 
 	constructor(
@@ -94,7 +95,8 @@ export class AdminFormComponent implements OnInit {
 
 	ngOnInit(): void {
 		// Load roles first - e.g., from adminService.getRoles()
-		
+		this.rolesControl = this.adminForm.get('roles') as FormControl;
+
 		this.roleService.getRoles().subscribe({
 		  next: roles => this.allRoles = roles,
 		  error: err => console.error('Role load failed:', err)
@@ -270,6 +272,21 @@ export class AdminFormComponent implements OnInit {
 			}
 		});
 	}
+	onRolesSelectionChange(event: MatSelectChange) {
+	  this.adminForm.get('roles')?.setValue(event.value);
+	}
+	onRoleToggle(roleId: number, checked: boolean) {
+	  const rolesControl = this.adminForm.get('roles');
+	  if (!rolesControl) return;
+
+	  const currentRoles = rolesControl.value as number[];
+	  const updatedRoles = checked
+	    ? [...currentRoles, roleId]
+	    : currentRoles.filter(id => id !== roleId);
+
+	  rolesControl.setValue(updatedRoles);
+	}
+
 	
 	onRoleChange(event: any, roleId: number) {
 	  const roles: number[] = this.adminForm.get('roles')?.value || [];

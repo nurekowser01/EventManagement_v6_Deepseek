@@ -40,7 +40,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public boolean isAccountNonLocked() {
-		return admin.getLoginAttempts() < 5;
+		return admin.getLoginAttempts() < 5 || admin.getIsActive();
 	}
 
 	@Override
