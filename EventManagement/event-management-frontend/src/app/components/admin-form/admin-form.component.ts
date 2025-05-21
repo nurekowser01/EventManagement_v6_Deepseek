@@ -94,8 +94,10 @@ export class AdminFormComponent implements OnInit {
 
 	ngOnInit(): void {
 		// Load roles first - e.g., from adminService.getRoles()
-		this.roleService.getRoles().subscribe(roles => {
-		  this.allRoles = roles;  // All roles available in system
+		
+		this.roleService.getRoles().subscribe({
+		  next: roles => this.allRoles = roles,
+		  error: err => console.error('Role load failed:', err)
 		});
 
 			// If editing, fetch admin and patch values including roles
@@ -110,6 +112,7 @@ export class AdminFormComponent implements OnInit {
 					this.adminForm.patchValue({
 						...admin,
 						roles: admin.roles?.map(r => r.id) || []
+						
 					});
 					this.adminForm.get('password')?.disable();
 					this.adminForm.get('confirmPassword')?.disable();
@@ -214,10 +217,13 @@ export class AdminFormComponent implements OnInit {
 		const formValue = this.adminForm.getRawValue();
 
 		const admin: Admin = {
-			...formValue,
-			id: this.isEditing ? this.admin.id : undefined,
-			roles: this.allRoles.filter(role => formValue.roles.includes(role.id))
+		  ...formValue,
+		  id: this.isEditing ? this.admin.id : undefined,
+		  roles: this.allRoles
+		    .filter(role => formValue.roles.includes(role.id))
+		    .map(role => role.type)  // <-- map to role type string
 		};
+
 
 		this.adminService.saveAdmin(admin).subscribe({
 			next: (savedAdmin) => {

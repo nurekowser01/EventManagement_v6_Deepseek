@@ -118,14 +118,14 @@ public class AdminService {
 		}
 
 		// Update roles
-	    Set<Role> roles = new HashSet<>();
+	   
 	    if (dto.getRoles() != null && !dto.getRoles().isEmpty()) {
-	        roles = dto.getRoles().stream()
-	                .map(roleType -> roleRepo.findByType(roleType)
-	                        .orElseThrow(() -> new RuntimeException("Role not found: " + roleType)))
-	                .collect(Collectors.toSet());
+	        Set<Role> roles = dto.getRoles().stream()
+	            .map(roleType -> roleRepo.findByType(roleType)
+	                .orElseThrow(() -> new RuntimeException("Role not found: " + roleType)))
+	            .collect(Collectors.toSet());
+	        admin.setRoles(roles);
 	    }
-	    admin.setRoles(roles);
 
 		Admin saved = adminRepo.save(admin);
 		return mapToResponseDTO(saved);

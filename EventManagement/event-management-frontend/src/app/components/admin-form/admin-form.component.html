@@ -84,13 +84,13 @@
 	<!-- Add this inside your form -->
 	<div class="form-column roles-container">
 		<label>Roles</label>
-		<div *ngFor="let role of allRoles" class="role-checkbox">
+		
 			<mat-form-field appearance="fill" class="full-width">
 			<mat-label>Roles</mat-label> <mat-select formControlName="roles"
 				multiple> <mat-option *ngFor="let role of allRoles"
 				[value]="role.id"> {{ role.type }} </mat-option> </mat-select> </mat-form-field>
 
-		</div>
+		
 	</div>
 
 
