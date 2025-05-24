@@ -14,6 +14,7 @@ import org.mkab.EventManagement.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -41,39 +42,47 @@ public class AdminController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
-	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PreAuthorize("hasRole('SUPER_ADMIN')")
 	@PostMapping
 	public ResponseEntity<AdminResponseDTO> create(@RequestBody AdminRequestDTO dto) {
 		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
 		return ResponseEntity.ok(adminService.createAdmin(dto, currentUsername));
 	}
 
-	//@PreAuthorize("hasAnyRole('SUPER_ADMIN')")
+	@PreAuthorize("hasAnyRole('SUPER_ADMIN')")
 	@GetMapping
 	public List<AdminResponseDTO> getAll() {
 		return adminService.getAllAdmins();
 	}
 
-	//@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
-	@GetMapping("/{id}")
-	public ResponseEntity<AdminResponseDTO> get(@PathVariable Long id) {
-		return ResponseEntity.ok(adminService.getAdminById(id));
-	}
+	@PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
+    @GetMapping("/{id}")
+    public ResponseEntity<AdminResponseDTO> get(@PathVariable Long id) {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        Admin currentAdmin = adminRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Admin not found"));
+        
+        if (!currentAdmin.isSuperAdmin() && !currentAdmin.getId().equals(id)) {
+            throw new AccessDeniedException("You can only view your own profile");
+        }
+        
+        return ResponseEntity.ok(adminService.getAdminById(id));
+    }
 
-	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PreAuthorize("hasRole('SUPER_ADMIN')")
 	@PutMapping("/{id}")
 	public ResponseEntity<AdminResponseDTO> update(@PathVariable Long id, @RequestBody AdminRequestDTO dto) {
 		return ResponseEntity.ok(adminService.updateAdmin(id, dto));
 	}
 
-	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PreAuthorize("hasRole('SUPER_ADMIN')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		adminService.deleteAdmin(id);
 		return ResponseEntity.noContent().build();
 	}
 
-	//@PreAuthorize("hasRole('SUPER_ADMIN')")
+	@PreAuthorize("hasRole('SUPER_ADMIN')")
 	@PostMapping("/{id}/upload-profile-image")
 	public ResponseEntity<Map<String, String>> uploadProfileImage(@PathVariable Long id,
 			@RequestParam("image") MultipartFile imageFile) {
@@ -99,5 +108,11 @@ public class AdminController {
 			return ResponseEntity.status(500).body(Collections.singletonMap("error", "Image upload failed."));
 		}
 	}
+	
+	@ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
 
 }

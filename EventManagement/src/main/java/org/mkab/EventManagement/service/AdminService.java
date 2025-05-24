@@ -56,7 +56,7 @@ public class AdminService {
 		admin.setMobile(dto.getMobile());
 		admin.setDateOfBirth(dto.getDateOfBirth());
 		admin.setProfileImage(dto.getProfileImage());
-		admin.setSuperAdmin(dto.isSuperAdmin());
+//		admin.setSuperAdmin(dto.isSuperAdmin());
 		admin.setIsActive(dto.getIsActive());
 		admin.setNotes(dto.getNotes());
 		admin.setLastLoginAt(dto.getLastLoginAt());
@@ -102,7 +102,7 @@ public class AdminService {
 		admin.setMobile(dto.getMobile());
 		admin.setDateOfBirth(dto.getDateOfBirth());
 		admin.setProfileImage(dto.getProfileImage());
-		admin.setSuperAdmin(dto.isSuperAdmin());
+//		admin.setSuperAdmin(dto.isSuperAdmin());
 		admin.setIsActive(dto.getIsActive());
 		admin.setNotes(dto.getNotes());
 //        admin.setLastLoginAt(dto.getLastLoginAt());
@@ -151,7 +151,7 @@ public class AdminService {
 		dto.setMobile(admin.getMobile());
 		dto.setDateOfBirth(admin.getDateOfBirth());
 		dto.setProfileImage(admin.getProfileImage());
-		dto.setSuperAdmin(admin.isSuperAdmin());
+//		dto.setSuperAdmin(admin.isSuperAdmin());
 		dto.setIsActive(admin.getIsActive());
 		dto.setNotes(admin.getNotes());
 		dto.setLastLoginAt(admin.getLastLoginAt());

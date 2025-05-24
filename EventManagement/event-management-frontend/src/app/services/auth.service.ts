@@ -16,6 +16,8 @@ export class AuthService {
       tap(response => {
         console.log('Login Response:', response);
         localStorage.setItem('token', response.token);
+		localStorage.setItem('adminId', response.id.toString());
+
       }),
       catchError((error: HttpErrorResponse) => {
         return throwError(() => error); // return original HttpErrorResponse

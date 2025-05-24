@@ -58,7 +58,7 @@ public class AuthController {
             
             adminRepository.save(admin);
 
-            return ResponseEntity.ok(new AuthResponse(token));
+            return ResponseEntity.ok(new AuthResponse(token, admin.getId()));
 
         } catch (BadCredentialsException ex) {
             // Increment login attempts

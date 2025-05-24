@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.mkab.EventManagement.entity.Role;
+import org.mkab.EventManagement.model.enums.RoleType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -79,6 +80,14 @@ public class Admin {
     private Set<Role> roles;
    
 
-    private boolean isSuperAdmin;
+    
+    public boolean isSuperAdmin() {
+        if (this.roles == null || this.roles.isEmpty()) {
+            return false;
+        }
+        return this.roles.stream()
+                .anyMatch(role -> role.getType() == RoleType.SUPER_ADMIN);
+    }
+
 
 }

@@ -31,7 +31,7 @@ public class RunnerAdmin {
              admin.setMobile("1234567890");
              admin.setDateOfBirth(LocalDate.parse("1990-01-01"));
              admin.setProfileImage(null); // optional
-             admin.setSuperAdmin(true); 
+//             admin.setSuperAdmin(true); 
              adminRepository.save(admin);
 
              System.out.println("✅ Super Admin user created: superadmin / admin123");
