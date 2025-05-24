@@ -1,120 +1,160 @@
-<mat-card class="admin-edit-card"> <!-- Profile Image Upload and Preview -->
-<div class="profile-container" *ngIf="admin">
-	<img
-		[src]="
-        imagePreview
-          || (admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar.png')
-      "
-		(error)="onImageError($event)" alt="Profile" class="profile-img" />
-	<input type="file" (change)="onFileSelected($event)" accept="image/*" />
-</div>
+<!-- Admin Edit/Create Card -->
+<mat-card class="admin-edit-card">
+  <!-- ========== PROFILE IMAGE SECTION ========== -->
+  <div class="profile-container" *ngIf="admin">
+    <img
+      [src]="imagePreview || (admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar.png')"
+      (error)="onImageError($event)"
+      alt="Admin Profile Image"
+      class="profile-img"
+    />
+    <input 
+      type="file" 
+      (change)="onFileSelected($event)" 
+      accept="image/*" 
+      aria-label="Upload profile image"
+    />
+  </div>
 
-<!-- Loading Spinners for Compression and Save -->
-<div *ngIf="isCompressing || isSaving" class="spinner-container">
-	<mat-spinner diameter="30"></mat-spinner>
-	<span>{{ isCompressing ? 'Compressing image...' : 'Saving...' }}</span>
-</div>
+  <!-- ========== LOADING INDICATORS ========== -->
+  <div *ngIf="isCompressing || isSaving" class="spinner-container">
+    <mat-spinner diameter="30"></mat-spinner>
+    <span>{{ isCompressing ? 'Compressing image...' : 'Saving...' }}</span>
+  </div>
 
-<!-- Form Header with Title and Save Button -->
+  <!-- ========== FORM HEADER ========== -->
+  <!-- ========== FORM HEADER ========== -->
 <div class="form-header">
-	<h2>{{ isEditing ? 'Edit Admin' : 'Create Admin' }}</h2>
-	<button mat-raised-button color="primary" (click)="onSubmit()">Save</button>
+  <h2>{{ isEditing ? 'Edit Admin' : 'Create Admin' }}</h2>
+  <!-- Added type to prevent form submission -->
+  <button mat-raised-button color="primary" (click)="onSubmit()" type="button">
+    Save
+  </button>
 </div>
 
-<mat-divider></mat-divider> <!-- Main Admin Form -->
-<form [formGroup]="adminForm" class="admin-form-grid"
-	(ngSubmit)="onSubmit()">
 
-	<!-- LEFT COLUMN -->
-	<div class="form-column">
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Name</mat-label> <input matInput formControlName="name" />
-		</mat-form-field>
+  <mat-divider></mat-divider>
 
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Username</mat-label> <input matInput
-			formControlName="username" /> </mat-form-field>
+  <!-- ========== MAIN FORM ========== -->
+  <form [formGroup]="adminForm" class="admin-form-grid" (ngSubmit)="onSubmit()">
+    <!-- LEFT COLUMN - Basic Information -->
+    <div class="form-column">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" required>
+      </mat-form-field>
 
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Email</mat-label> <input matInput formControlName="email" />
-		</mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Username</mat-label>
+        <input matInput formControlName="username" required>
+      </mat-form-field>
 
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Mobile</mat-label> <input matInput formControlName="mobile" />
-		</mat-form-field>
-	</div>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" type="email" required>
+      </mat-form-field>
 
-	<!-- RIGHT COLUMN -->
-	<div class="form-column">
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Date of Birth</mat-label> <input matInput
-			[matDatepicker]="picker" formControlName="dateOfBirth" /> <mat-datepicker-toggle
-			matSuffix [for]="picker"></mat-datepicker-toggle> <mat-datepicker
-			#picker></mat-datepicker> </mat-form-field>
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Mobile</mat-label>
+        <input matInput formControlName="mobile" type="tel">
+      </mat-form-field>
+    </div>
 
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Profile Image URL</mat-label> <input matInput
-			formControlName="profileImage" /> </mat-form-field>
+    <!-- RIGHT COLUMN - Additional Information -->
+    <div class="form-column">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Date of Birth</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="dateOfBirth">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
-		<!-- Password Fields -->
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Profile Image URL</mat-label>
+        <input matInput formControlName="profileImage" type="url">
+      </mat-form-field>
 
-		<!-- Show 'Change Password' button only in edit mode and if password edit not allowed yet -->
-		<ng-container *ngIf="isEditing && !allowPasswordEdit">
-		<button mat-stroked-button color="accent" type="button"
-			(click)="enablePasswordEdit()">Change Password</button>
-		</ng-container>
+      <!-- PASSWORD SECTION -->
+      <ng-container *ngIf="isEditing && !allowPasswordEdit">
+        <button 
+          mat-stroked-button 
+          color="accent" 
+          type="button"
+          (click)="enablePasswordEdit()"
+        >
+          Change Password
+        </button>
+      </ng-container>
 
-		<!-- Password inputs shown if creating new admin or password edit enabled -->
-		<ng-container *ngIf="!isEditing || allowPasswordEdit">
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Password</mat-label> <input matInput
-			[type]="hidePassword ? 'password' : 'text'"
-			formControlName="password" />
-		<button mat-icon-button matSuffix type="button"
-			(click)="hidePassword = !hidePassword">
-			<mat-icon> {{ hidePassword ? 'visibility_off' :
-			'visibility' }} </mat-icon>
-		</button>
-		</mat-form-field> <mat-form-field appearance="fill" class="full-width">
-		<mat-label>Confirm Password</mat-label> <input matInput
-			[type]="hideConfirmPassword ? 'password' : 'text'"
-			formControlName="confirmPassword" />
-		<button mat-icon-button matSuffix type="button"
-			(click)="hideConfirmPassword = !hideConfirmPassword">
-			<mat-icon> {{ hideConfirmPassword ? 'visibility_off' :
-			'visibility' }} </mat-icon>
-		</button>
-		</mat-form-field> <!-- Password mismatch error --> <mat-error
-			*ngIf="
-            adminForm.errors?.['passwordMismatch'] &&
-            adminForm.get('confirmPassword')?.touched
-          ">
-		Passwords do not match </mat-error> </ng-container>
+      <ng-container *ngIf="!isEditing || allowPasswordEdit">
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Password</mat-label>
+          <input 
+            matInput
+            [type]="hidePassword ? 'password' : 'text'"
+            formControlName="password"
+            required
+          >
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hidePassword = !hidePassword"
+            aria-label="Toggle password visibility"
+          >
+            <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
 
-		<!-- Active Status Checkbox -->
-		<mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
-	</div>
+        <mat-form-field appearance="fill" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input 
+            matInput
+            [type]="hideConfirmPassword ? 'password' : 'text'"
+            formControlName="confirmPassword"
+            required
+          >
+          <button 
+            mat-icon-button 
+            matSuffix 
+            type="button"
+            (click)="hideConfirmPassword = !hideConfirmPassword"
+            aria-label="Toggle confirm password visibility"
+          >
+            <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+        </mat-form-field>
 
-	<!-- ROLES SELECTION -->
-	<div class="form-full roles-section">
-  <label class="mat-subheading-1">Assign Roles</label>
-  
-  <mat-chip-listbox multiple class="roles-chip-container">
-   <mat-chip-option *ngFor="let role of allRoles" 
-                [selected]="isRoleSelected(role.type)"
-                [color]="isRoleSelected(role.type) ? 'primary' : undefined"
-                (click)="toggleRole(role.type)">
-  {{ role.type }}
-</mat-chip-option>
-  </mat-chip-listbox>
-</div>
+        <mat-error *ngIf="adminForm.errors?.['passwordMismatch'] && adminForm.get('confirmPassword')?.touched">
+          Passwords do not match
+        </mat-error>
+      </ng-container>
 
-	<!-- Notes Field (Full width) -->
-	<div class="form-full">
-		<mat-form-field appearance="fill" class="full-width">
-		<mat-label>Notes</mat-label> <textarea matInput
-			formControlName="notes" rows="3"></textarea> </mat-form-field>
-	</div>
+      <mat-checkbox formControlName="isActive">Is Active</mat-checkbox>
+    </div>
 
-</form>
+    <!-- ========== ROLES SECTION ========== -->
+    <div class="form-full roles-section">
+      <h3 class="mat-heading-1">Assign Roles</h3>
+      <mat-chip-listbox multiple class="roles-chip-container">
+        <mat-chip-option 
+          *ngFor="let role of allRoles" 
+          [selected]="isRoleSelected(role.type)"
+          [color]="isRoleSelected(role.type) ? 'primary' : undefined"
+          [matTooltip]="role.details"
+          (click)="toggleRole(role.type)"
+        >
+          {{ role.type }}
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- ========== NOTES SECTION ========== -->
+    <div class="form-full">
+      <mat-form-field appearance="fill" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" rows="3"></textarea>
+      </mat-form-field>
+    </div>
+  </form>
 </mat-card>

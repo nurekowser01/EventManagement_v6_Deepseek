@@ -21,6 +21,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { environment } from '../../../environments/environment';
 import imageCompression from 'browser-image-compression';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-admin-form',
@@ -41,7 +42,8 @@ import { ReactiveFormsModule } from '@angular/forms';
     MatProgressSpinnerModule,
     MatChipsModule,
     MatAutocompleteModule,
-	ReactiveFormsModule
+	ReactiveFormsModule,
+	MatTooltipModule
   ]
 })
 export class AdminFormComponent implements OnInit {
