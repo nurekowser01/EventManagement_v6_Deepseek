@@ -1,11 +1,12 @@
 // admin-form.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 import { Admin, Role } from '../../models/admin.model';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,14 +16,21 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
-import { environment } from '../../../environments/environment';
-import imageCompression from 'browser-image-compression';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { RoleService } from '../../services/role.service';
-import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import { MatSelectModule, MatSelectChange } from '@angular/material/select';
+import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+import { Observable, map, startWith } from 'rxjs';
+
+import { environment } from '../../../environments/environment';
+import imageCompression from 'browser-image-compression';
+import { MatChipGrid } from '@angular/material/chips';
+
 
 @Component({
 	selector: 'app-admin-form',
@@ -42,7 +50,11 @@ import { MatSelectChange, MatSelectModule } from '@angular/material/select';
 		MatIconModule,
 		MatCardModule,
 		MatDividerModule,
-		MatProgressSpinnerModule, MatDialogModule,MatSelectModule
+		MatProgressSpinnerModule,
+		MatDialogModule,
+		MatSelectModule,
+		MatChipsModule,
+		MatAutocompleteModule
 	]
 })
 export class AdminFormComponent implements OnInit {
@@ -54,16 +66,21 @@ export class AdminFormComponent implements OnInit {
 
 	selectedImageFile: File | null = null;
 	imagePreview: string | ArrayBuffer | null = null;
-	backendUrl = environment.apiBaseUrl;
 	originalImagePreview: string | ArrayBuffer | null = null;
+	backendUrl = environment.apiBaseUrl;
 
 	isCompressing = false;
 	isSaving = false;
 	hidePassword = true;
 	hideConfirmPassword = true;
 
-	allRoles: Role[] = []; // all available roles from backend or hardcoded
-	rolesControl!: FormControl;
+	allRoles: Role[] = []; // all available roles
+	readonly separatorKeysCodes = [ENTER, COMMA] as const;
+
+	
+	// Change selectedRoles to work with strings
+	selectedRoleTypes: string[] = []; // Stores just the role type strings ("PRINT_REPORT")
+	
 	
 
 	constructor(
@@ -87,48 +104,56 @@ export class AdminFormComponent implements OnInit {
 				profileImage: [''],
 				isActive: [true],
 				notes: [''],
-				roles: [[]]  // <-- new control for multiple roles
+				roles: [[]]  // control for multiple roles (role IDs)
 			},
 			{ validators: this.passwordsMatchValidator }
 		);
-	}
 
-	ngOnInit(): void {
-		// Load roles first - e.g., from adminService.getRoles()
-		this.rolesControl = this.adminForm.get('roles') as FormControl;
-
-		this.roleService.getRoles().subscribe({
-		  next: roles => this.allRoles = roles,
-		  error: err => console.error('Role load failed:', err)
-		});
-
-			// If editing, fetch admin and patch values including roles
-			const id = this.route.snapshot.params['id'];
-			if (id) {
-				this.isEditing = true;
-				this.adminId = +id;
-
-				this.adminService.getAdminById(this.adminId).subscribe(admin => {
-					this.admin = admin;
-					// patch all fields
-					this.adminForm.patchValue({
-						...admin,
-						roles: admin.roles?.map(r => r.id) || []
-						
-					});
-					this.adminForm.get('password')?.disable();
-					this.adminForm.get('confirmPassword')?.disable();
-
-					if (admin.profileImage) {
-						this.imagePreview = this.backendUrl + admin.profileImage;
-						this.originalImagePreview = this.imagePreview;
-					}
-				});
-			}
 		
 	}
 
+	ngOnInit(): void {
+		// Load roles from backend
+		this.roleService.getRoles().subscribe({
+			next: roles => {
+				this.allRoles = roles;
+				// Initialize filtered roles after loading
+				
+			},
+			error: err => console.error('Role load failed:', err)
+		});
+		// In your ngOnInit or where you load admin data
+		
+		// Load admin if editing
+		const id = this.route.snapshot.params['id'];
+		if (id) {
+			this.isEditing = true;
+			this.adminId = +id;
 
+			this.adminService.getAdminById(this.adminId).subscribe(admin => {
+				this.admin = admin;
+				// Initialize selected roles with full role objects
+				this.initializeSelectedRoles(admin.roles || []);
+	            this.updateRoleFormValue();
+				
+				console.log('Selected Roles from DB : ' + admin.roles);
+				
+				this.adminForm.patchValue({
+					...admin,
+					//roles: this.selectedRoles // Patch with string array
+
+				});
+
+				this.adminForm.get('password')?.disable();
+				this.adminForm.get('confirmPassword')?.disable();
+
+				if (admin.profileImage) {
+					this.imagePreview = this.backendUrl + admin.profileImage;
+					this.originalImagePreview = this.imagePreview;
+				}
+			});
+		}
+	}
 
 	passwordsMatchValidator(form: FormGroup) {
 		const password = form.get('password')?.value;
@@ -215,21 +240,16 @@ export class AdminFormComponent implements OnInit {
 
 		this.isSaving = true;
 
-		// Map form value roles (array of role IDs) back to role objects if needed, or send IDs directly
 		const formValue = this.adminForm.getRawValue();
 
 		const admin: Admin = {
-		  ...formValue,
-		  id: this.isEditing ? this.admin.id : undefined,
-		  roles: this.allRoles
-		    .filter(role => formValue.roles.includes(role.id))
-		    .map(role => role.type)  // <-- map to role type string
+			...formValue,
+			id: this.isEditing ? this.admin.id : undefined,
+			roles: this.selectedRoleTypes
 		};
-
 
 		this.adminService.saveAdmin(admin).subscribe({
 			next: (savedAdmin) => {
-
 				const isImageChanged = this.imagePreview !== this.originalImagePreview;
 
 				if (this.selectedImageFile && isImageChanged && savedAdmin.id) {
@@ -272,35 +292,39 @@ export class AdminFormComponent implements OnInit {
 			}
 		});
 	}
-	onRolesSelectionChange(event: MatSelectChange) {
-	  this.adminForm.get('roles')?.setValue(event.value);
+
+
+
+	// Helper method to convert role strings to full role objects
+	// Initialize selected roles
+	private initializeSelectedRoles(roleTypes: string[] = []): void {
+	  this.selectedRoleTypes = roleTypes;
+	  this.updateRoleFormValue();
 	}
-	onRoleToggle(roleId: number, checked: boolean) {
-	  const rolesControl = this.adminForm.get('roles');
-	  if (!rolesControl) return;
 
-	  const currentRoles = rolesControl.value as number[];
-	  const updatedRoles = checked
-	    ? [...currentRoles, roleId]
-	    : currentRoles.filter(id => id !== roleId);
+	// Check if role is selected
+	isRoleSelected(roleType: string): boolean {
+	  return this.selectedRoleTypes.includes(roleType);
+	}
 
-	  rolesControl.setValue(updatedRoles);
+	// Toggle role selection
+	toggleRole(roleType: string): void {
+	  if (this.isRoleSelected(roleType)) {
+	    this.selectedRoleTypes = this.selectedRoleTypes.filter(r => r !== roleType);
+	  } else {
+	    this.selectedRoleTypes = [...this.selectedRoleTypes, roleType];
+	  }
+	  this.updateRoleFormValue();
+	}
+
+	// Update form control
+	private updateRoleFormValue(): void {
+	  this.adminForm.get('roles')?.setValue(this.selectedRoleTypes);
 	}
 
 	
-	onRoleChange(event: any, roleId: number) {
-	  const roles: number[] = this.adminForm.get('roles')?.value || [];
-	  if (event.checked) {
-	    if (!roles.includes(roleId)) {
-	      roles.push(roleId);
-	    }
-	  } else {
-	    const index = roles.indexOf(roleId);
-	    if (index >= 0) {
-	      roles.splice(index, 1);
-	    }
-	  }
-	  this.adminForm.get('roles')?.setValue(roles);
-	}
+
+	
+
 
 }

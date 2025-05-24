@@ -86,3 +86,128 @@
 	background-color: #f44336;
 	color: #fff;
 }
+
+/* styles.css or your component CSS */
+.roles-chip-container {
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-top: 8px;
+}
+
+mat-chip-option {
+  margin: 4px;
+}
+
+/* Custom colors for unselected chips */
+mat-chip-option:not([color]) {
+  background-color: #f5f5f5;
+  
+  /* Roles section styling */
+.roles-section {
+  margin: 16px 0;
+}
+
+/* Role count badge */
+.role-count-badge {
+  background: #3f51b5;
+  color: white;
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+/* Chips container */
+.roles-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-top: 8px;
+  min-height: 56px;
+  background: white;
+}
+
+/* Individual chips */
+mat-chip-option {
+  margin: 2px;
+  transition: all 0.2s ease;
+}
+
+/* Unselected chips */
+mat-chip-option:not([color]) {
+  background-color: #f5f5f5;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #e0e0e0;
+}
+
+/* Selected chips */
+mat-chip-option[color="primary"] {
+  color: white;
+}
+
+/* Icons inside chips */
+.role-icon {
+  margin-right: 4px;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.selected-icon {
+  margin-left: 4px;
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+/* Loading state */
+.loading-roles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+/* Empty state */
+.no-roles-message {
+  padding: 12px;
+  color: rgba(0, 0, 0, 0.54);
+  font-style: italic;
+  border: 1px dashed #e0e0e0;
+  border-radius: 4px;
+}
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* In your component's CSS file */
+.roles-chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  margin-top: 8px;
+  min-height: 56px; /* Mat-form-field default height */
+}
+
+mat-chip-option {
+  margin: 2px;
+}
+
+/* Style for unselected chips */
+mat-chip-option:not([color]) {
+  background-color: #f5f5f5;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+/* Style for selected chips */
+mat-chip-option[color="primary"] {
+  color: white;
+}

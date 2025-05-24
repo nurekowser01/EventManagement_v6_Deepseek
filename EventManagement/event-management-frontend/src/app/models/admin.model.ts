@@ -32,5 +32,5 @@ export interface Admin {
 	createdBy?: string;
 	updatedBy?: string;
 
-	roles?: Role[];
+	roles?: string[];
 }
