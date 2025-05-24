@@ -1,12 +1,9 @@
-// admin-form.component.ts
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../../services/admin.service';
 import { Admin, Role } from '../../models/admin.model';
-import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -17,314 +14,367 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { RoleService } from '../../services/role.service';
-import { MatSelectModule, MatSelectChange } from '@angular/material/select';
-import { MatChipsModule, MatChipInputEvent } from '@angular/material/chips';
-import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-
-import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { Observable, map, startWith } from 'rxjs';
-
+import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { environment } from '../../../environments/environment';
 import imageCompression from 'browser-image-compression';
-import { MatChipGrid } from '@angular/material/chips';
-
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
-	selector: 'app-admin-form',
-	standalone: true,
-	templateUrl: './admin-form.component.html',
-	styleUrls: ['./admin-form.component.css'],
-	imports: [
-		ReactiveFormsModule,
-		CommonModule,
-		MatFormFieldModule,
-		MatButtonModule,
-		MatCheckboxModule,
-		MatDatepickerModule,
-		MatNativeDateModule,
-		MatInputModule,
-		MatSnackBarModule,
-		MatIconModule,
-		MatCardModule,
-		MatDividerModule,
-		MatProgressSpinnerModule,
-		MatDialogModule,
-		MatSelectModule,
-		MatChipsModule,
-		MatAutocompleteModule
-	]
+  selector: 'app-admin-form',
+  standalone: true,
+  templateUrl: './admin-form.component.html',
+  styleUrls: ['./admin-form.component.css'],
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    MatIconModule,
+    MatCardModule,
+    MatDividerModule,
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+	ReactiveFormsModule
+  ]
 })
 export class AdminFormComponent implements OnInit {
-	adminForm: FormGroup;
-	adminId?: number;
-	isEditing = false;
-	allowPasswordEdit = false;
-	admin: Admin = {} as Admin;
+  // Form configuration
+  adminForm: FormGroup;
+  
+  // Admin state management
+  adminId?: number;
+  isEditing = false;
+  admin: Admin = {} as Admin;
+  
+  // Password fields state
+  allowPasswordEdit = false;
+  hidePassword = true;
+  hideConfirmPassword = true;
+  
+  // Image handling
+  selectedImageFile: File | null = null;
+  imagePreview: string | ArrayBuffer | null = null;
+  originalImagePreview: string | ArrayBuffer | null = null;
+  backendUrl = environment.apiBaseUrl;
+  isCompressing = false;
+  
+  // Loading states
+  isSaving = false;
+  
+  // Role management
+  allRoles: Role[] = []; // All available roles from API
+  selectedRoleTypes: string[] = []; // Currently selected role types (e.g. ["PRINT_REPORT"])
 
-	selectedImageFile: File | null = null;
-	imagePreview: string | ArrayBuffer | null = null;
-	originalImagePreview: string | ArrayBuffer | null = null;
-	backendUrl = environment.apiBaseUrl;
+  constructor(
+    private fb: FormBuilder,
+    private adminService: AdminService,
+    private roleService: RoleService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
+  ) {
+    // Initialize form with validation
+    this.adminForm = this.fb.group({
+      username: ['', Validators.required],
+      password: [''],
+      confirmPassword: [''],
+      name: ['', Validators.required],
+      mobile: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email]],
+      dateOfBirth: [''],
+      profileImage: [''],
+      isActive: [true],
+      notes: [''],
+      roles: [[]] // Stores role type strings
+    }, { validators: this.passwordsMatchValidator });
+  }
 
-	isCompressing = false;
-	isSaving = false;
-	hidePassword = true;
-	hideConfirmPassword = true;
+  ngOnInit(): void {
+    this.loadRoles();
+    this.checkEditMode();
+  }
 
-	allRoles: Role[] = []; // all available roles
-	readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  /**
+   * Loads all available roles from the API
+   */
+  private loadRoles(): void {
+    this.roleService.getRoles().subscribe({
+      next: (roles) => this.allRoles = roles,
+      error: (err) => {
+        console.error('Role load failed:', err);
+        this.snackBar.open('Failed to load roles', 'Close', { duration: 3000 });
+      }
+    });
+  }
 
-	
-	// Change selectedRoles to work with strings
-	selectedRoleTypes: string[] = []; // Stores just the role type strings ("PRINT_REPORT")
-	
-	
+  /**
+   * Checks if we're in edit mode and loads admin data if needed
+   */
+  private checkEditMode(): void {
+    const id = this.route.snapshot.params['id'];
+    if (id) {
+      this.isEditing = true;
+      this.adminId = +id;
+      this.loadAdminData();
+    }
+  }
 
-	constructor(
-		private fb: FormBuilder,
-		private adminService: AdminService,
-		private roleService: RoleService,
-		private router: Router,
-		private route: ActivatedRoute,
-		private snackBar: MatSnackBar,
-		private dialog: MatDialog
-	) {
-		this.adminForm = this.fb.group(
-			{
-				username: ['', Validators.required],
-				password: [''],
-				confirmPassword: [''],
-				name: ['', Validators.required],
-				mobile: ['', Validators.required],
-				email: ['', [Validators.required, Validators.email]],
-				dateOfBirth: [''],
-				profileImage: [''],
-				isActive: [true],
-				notes: [''],
-				roles: [[]]  // control for multiple roles (role IDs)
-			},
-			{ validators: this.passwordsMatchValidator }
-		);
+  /**
+   * Loads admin data for editing
+   */
+  private loadAdminData(): void {
+    this.adminService.getAdminById(this.adminId!).subscribe({
+      next: (admin) => {
+        this.admin = admin;
+        this.initializeSelectedRoles(admin.roles || []);
+        
+        // Patch form values except password fields
+        this.adminForm.patchValue({
+          ...admin,
+          password: '',
+          confirmPassword: ''
+        });
 
-		
-	}
+        // Disable password fields initially
+        this.adminForm.get('password')?.disable();
+        this.adminForm.get('confirmPassword')?.disable();
 
-	ngOnInit(): void {
-		// Load roles from backend
-		this.roleService.getRoles().subscribe({
-			next: roles => {
-				this.allRoles = roles;
-				// Initialize filtered roles after loading
-				
-			},
-			error: err => console.error('Role load failed:', err)
-		});
-		// In your ngOnInit or where you load admin data
-		
-		// Load admin if editing
-		const id = this.route.snapshot.params['id'];
-		if (id) {
-			this.isEditing = true;
-			this.adminId = +id;
+        // Load profile image if exists
+        if (admin.profileImage) {
+          this.imagePreview = this.backendUrl + admin.profileImage;
+          this.originalImagePreview = this.imagePreview;
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load admin', err);
+        this.snackBar.open('Failed to load admin data', 'Close', { duration: 3000 });
+      }
+    });
+  }
 
-			this.adminService.getAdminById(this.adminId).subscribe(admin => {
-				this.admin = admin;
-				// Initialize selected roles with full role objects
-				this.initializeSelectedRoles(admin.roles || []);
-	            this.updateRoleFormValue();
-				
-				console.log('Selected Roles from DB : ' + admin.roles);
-				
-				this.adminForm.patchValue({
-					...admin,
-					//roles: this.selectedRoles // Patch with string array
+  /**
+   * Validates that password and confirm password match
+   */
+  passwordsMatchValidator(form: FormGroup) {
+    const password = form.get('password')?.value;
+    const confirmPassword = form.get('confirmPassword')?.value;
+    return password === confirmPassword ? null : { passwordMismatch: true };
+  }
 
-				});
+  /**
+   * Enables password fields for editing
+   */
+  enablePasswordEdit(): void {
+    this.allowPasswordEdit = true;
+    this.adminForm.get('password')?.enable();
+    this.adminForm.get('confirmPassword')?.enable();
+    this.adminForm.get('password')?.setValidators([Validators.required]);
+    this.adminForm.get('confirmPassword')?.setValidators([Validators.required]);
+    this.adminForm.get('password')?.updateValueAndValidity();
+    this.adminForm.get('confirmPassword')?.updateValueAndValidity();
+  }
 
-				this.adminForm.get('password')?.disable();
-				this.adminForm.get('confirmPassword')?.disable();
+  /**
+   * Handles image selection and compression
+   */
+  onFileSelected(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    if (!fileInput.files?.length) return;
 
-				if (admin.profileImage) {
-					this.imagePreview = this.backendUrl + admin.profileImage;
-					this.originalImagePreview = this.imagePreview;
-				}
-			});
-		}
-	}
+    const file = fileInput.files[0];
+    
+    // Validate file size
+    if (file.size > 20 * 1024 * 1024) {
+      this.showErrorSnackbar('Image is too large. Please upload under 20MB.');
+      return;
+    }
 
-	passwordsMatchValidator(form: FormGroup) {
-		const password = form.get('password')?.value;
-		const confirmPassword = form.get('confirmPassword')?.value;
-		return password === confirmPassword ? null : { passwordMismatch: true };
-	}
+    this.compressImage(file);
+  }
 
-	enablePasswordEdit() {
-		this.allowPasswordEdit = true;
-		this.adminForm.get('password')?.enable();
-		this.adminForm.get('confirmPassword')?.enable();
-		this.adminForm.get('password')?.setValidators([Validators.required]);
-		this.adminForm.get('confirmPassword')?.setValidators([Validators.required]);
-		this.adminForm.get('password')?.updateValueAndValidity();
-		this.adminForm.get('confirmPassword')?.updateValueAndValidity();
-	}
+  /**
+   * Compresses the selected image
+   */
+  private compressImage(file: File): void {
+    this.isCompressing = true;
+    const options = {
+      maxSizeMB: 2,
+      maxWidthOrHeight: 1024,
+      useWebWorker: true
+    };
 
-	onFileSelected(event: Event): void {
-		const fileInput = event.target as HTMLInputElement;
-		if (fileInput.files && fileInput.files.length > 0) {
-			const file = fileInput.files[0];
+    imageCompression(file, options)
+      .then(compressedFile => {
+        if (compressedFile.size > 2 * 1024 * 1024) {
+          this.showErrorSnackbar('Compressed image still exceeds 2MB.');
+          return;
+        }
 
-			if (file.size > 20 * 1024 * 1024) {
-				this.snackBar.open('Image is too large. Please upload under 20MB.', 'Close', {
-					duration: 3000,
-					panelClass: ['snackbar-error']
-				});
-				return;
-			}
+        this.handleCompressedImage(compressedFile);
+      })
+      .catch(error => {
+        console.error('Image compression failed:', error);
+        this.isCompressing = false;
+        this.showErrorSnackbar('Image processing failed');
+      });
+  }
 
-			this.isCompressing = true;
+  /**
+   * Handles the compressed image file
+   */
+  private handleCompressedImage(file: File): void {
+    this.selectedImageFile = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.imagePreview = reader.result;
+      this.isCompressing = false;
+    };
+    reader.readAsDataURL(file);
+  }
 
-			const options = {
-				maxSizeMB: 2,
-				maxWidthOrHeight: 1024,
-				useWebWorker: true
-			};
+  /**
+   * Handles image loading errors
+   */
+  onImageError(event: Event): void {
+    const imgElement = event.target as HTMLImageElement;
+    imgElement.src = 'assets/avatar.png';
+  }
 
-			imageCompression(file, options)
-				.then(compressedFile => {
-					if (compressedFile.size > 2 * 1024 * 1024) {
-						this.snackBar.open('Compressed image still exceeds 2MB.', 'Close', {
-							duration: 3000,
-							panelClass: ['snackbar-error']
-						});
-						this.isCompressing = false;
-						return;
-					}
+  /**
+   * Handles form submission
+   */
+  onSubmit(): void {
+    if (this.adminForm.invalid) {
+      this.adminForm.markAllAsTouched();
+      return;
+    }
 
-					this.selectedImageFile = compressedFile;
+    if (this.adminForm.errors?.['passwordMismatch']) {
+      this.showErrorSnackbar('Passwords do not match.');
+      return;
+    }
 
-					const reader = new FileReader();
-					reader.onload = () => {
-						this.imagePreview = reader.result;
-						this.isCompressing = false;
-					};
-					reader.readAsDataURL(compressedFile);
-				})
-				.catch(error => {
-					console.error('Image compression failed:', error);
-					this.isCompressing = false;
-				});
-		}
-	}
+    this.saveAdmin();
+  }
 
-	onImageError(event: Event) {
-		const imgElement = event.target as HTMLImageElement;
-		imgElement.src = 'assets/avatar.png';
-	}
+  /**
+   * Saves admin data to backend
+   */
+  private saveAdmin(): void {
+    this.isSaving = true;
+    const adminData = this.prepareAdminData();
 
-	onSubmit() {
-		if (this.adminForm.invalid) {
-			this.adminForm.markAllAsTouched();
-			return;
-		}
+    this.adminService.saveAdmin(adminData).subscribe({
+      next: (savedAdmin) => this.handleSaveSuccess(savedAdmin),
+      error: () => this.handleSaveError()
+    });
+  }
 
-		if (this.adminForm.errors?.['passwordMismatch']) {
-			this.snackBar.open('Passwords do not match.', 'Close', {
-				duration: 3000,
-				panelClass: ['snackbar-error']
-			});
-			return;
-		}
+  /**
+   * Prepares admin data for submission
+   */
+  private prepareAdminData(): Admin {
+    return {
+      ...this.adminForm.getRawValue(),
+      id: this.isEditing ? this.admin.id : undefined,
+      roles: this.selectedRoleTypes
+    };
+  }
 
-		this.isSaving = true;
+  /**
+   * Handles successful admin save
+   */
+  private handleSaveSuccess(savedAdmin: Admin): void {
+    if (this.selectedImageFile && this.imagePreview !== this.originalImagePreview) {
+      this.uploadProfileImage(savedAdmin.id!);
+    } else {
+      this.completeSaveProcess('Admin saved successfully!');
+    }
+  }
 
-		const formValue = this.adminForm.getRawValue();
+  /**
+   * Uploads profile image after successful admin save
+   */
+  private uploadProfileImage(adminId: number): void {
+    const formData = new FormData();
+    formData.append('image', this.selectedImageFile!, this.selectedImageFile!.name);
 
-		const admin: Admin = {
-			...formValue,
-			id: this.isEditing ? this.admin.id : undefined,
-			roles: this.selectedRoleTypes
-		};
+    this.adminService.uploadProfileImage(adminId, formData).subscribe({
+      next: () => this.completeSaveProcess('Admin saved and image uploaded successfully!'),
+      error: () => this.completeSaveProcess('Admin saved, but image upload failed.', true)
+    });
+  }
 
-		this.adminService.saveAdmin(admin).subscribe({
-			next: (savedAdmin) => {
-				const isImageChanged = this.imagePreview !== this.originalImagePreview;
+  /**
+   * Completes the save process with appropriate feedback
+   */
+  private completeSaveProcess(message: string, isError = false): void {
+    this.isSaving = false;
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: [isError ? 'snackbar-error' : 'snackbar-success']
+    });
+    this.router.navigate(['/admin/view', this.adminId || 'new']);
+  }
 
-				if (this.selectedImageFile && isImageChanged && savedAdmin.id) {
-					const formData = new FormData();
-					formData.append('image', this.selectedImageFile, this.selectedImageFile.name);
+  /**
+   * Handles save errors
+   */
+  private handleSaveError(): void {
+    this.isSaving = false;
+    this.showErrorSnackbar('Failed to save admin.');
+  }
 
-					this.adminService.uploadProfileImage(savedAdmin.id, formData).subscribe({
-						next: () => {
-							this.isSaving = false;
-							this.snackBar.open('Admin saved and image uploaded successfully!', 'Close', {
-								duration: 3000,
-								panelClass: ['snackbar-success']
-							});
-							this.router.navigate(['/admin/view', savedAdmin.id]);
-						},
-						error: () => {
-							this.isSaving = false;
-							this.snackBar.open('Admin saved, but image upload failed.', 'Close', {
-								duration: 3000,
-								panelClass: ['snackbar-error']
-							});
-							this.router.navigate(['/admin/view', savedAdmin.id]);
-						}
-					});
-				} else {
-					this.isSaving = false;
-					this.snackBar.open('Admin saved successfully!', 'Close', {
-						duration: 3000,
-						panelClass: ['snackbar-success']
-					});
-					this.router.navigate(['/admin/view', savedAdmin.id]);
-				}
-			},
-			error: () => {
-				this.isSaving = false;
-				this.snackBar.open('Failed to save admin.', 'Close', {
-					duration: 3000,
-					panelClass: ['snackbar-error']
-				});
-			}
-		});
-	}
+  /**
+   * Shows error snackbar
+   */
+  private showErrorSnackbar(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000,
+      panelClass: ['snackbar-error']
+    });
+  }
 
+  // Role Management Methods
 
+  /**
+   * Initializes selected roles from string array
+   */
+  private initializeSelectedRoles(roleTypes: string[]): void {
+    this.selectedRoleTypes = [...roleTypes];
+    this.updateRoleFormValue();
+  }
 
-	// Helper method to convert role strings to full role objects
-	// Initialize selected roles
-	private initializeSelectedRoles(roleTypes: string[] = []): void {
-	  this.selectedRoleTypes = roleTypes;
-	  this.updateRoleFormValue();
-	}
+  /**
+   * Checks if a role type is selected
+   */
+  isRoleSelected(roleType: string): boolean {
+    return this.selectedRoleTypes.includes(roleType);
+  }
 
-	// Check if role is selected
-	isRoleSelected(roleType: string): boolean {
-	  return this.selectedRoleTypes.includes(roleType);
-	}
+  /**
+   * Toggles role selection
+   */
+  toggleRole(roleType: string): void {
+    if (this.isRoleSelected(roleType)) {
+      this.selectedRoleTypes = this.selectedRoleTypes.filter(r => r !== roleType);
+    } else {
+      this.selectedRoleTypes = [...this.selectedRoleTypes, roleType];
+    }
+    this.updateRoleFormValue();
+  }
 
-	// Toggle role selection
-	toggleRole(roleType: string): void {
-	  if (this.isRoleSelected(roleType)) {
-	    this.selectedRoleTypes = this.selectedRoleTypes.filter(r => r !== roleType);
-	  } else {
-	    this.selectedRoleTypes = [...this.selectedRoleTypes, roleType];
-	  }
-	  this.updateRoleFormValue();
-	}
-
-	// Update form control
-	private updateRoleFormValue(): void {
-	  this.adminForm.get('roles')?.setValue(this.selectedRoleTypes);
-	}
-
-	
-
-	
-
-
+  /**
+   * Updates the roles form control value
+   */
+  private updateRoleFormValue(): void {
+    this.adminForm.get('roles')?.setValue(this.selectedRoleTypes);
+  }
 }
