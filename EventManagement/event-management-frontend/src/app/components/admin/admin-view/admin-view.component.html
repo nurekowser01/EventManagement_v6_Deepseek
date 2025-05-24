@@ -2,10 +2,15 @@
   <div class="header">
     <div class="left">
       <img [src]="admin?.profileImage ? backendUrl + admin.profileImage : 'assets/avatar-placeholder.png'"
-        alt="Profile" class="profile-img">
+           alt="Profile" class="profile-img">
     </div>
     <div class="right">
       <h2>{{ admin.name }}</h2>
+      <div class="status">
+        <mat-chip [color]="admin.isActive ? 'primary' : 'warn'">
+          {{ admin.isActive ? 'Active' : 'Inactive' }}
+        </mat-chip>
+      </div>
     </div>
   </div>
 
@@ -16,6 +21,20 @@
     <div class="info-item"><strong>Email:</strong> {{ admin.email }}</div>
     <div class="info-item"><strong>Mobile:</strong> {{ admin.mobile }}</div>
     <div class="info-item"><strong>DOB:</strong> {{ admin.dateOfBirth | date }}</div>
+    
+    <!-- Roles Section -->
+    <div class="info-item full">
+      <strong>Assigned Roles:</strong>
+      <mat-chip-listbox>
+        <mat-chip  *ngFor="let role of filteredRoles" 
+                 [color]="getRoleColor(role)"
+                 matTooltip="{{role.details}}">
+          {{role.type}}
+        </mat-chip>
+        <span class="no-roles" *ngIf="!admin.roles?.length">No roles assigned</span>
+      </mat-chip-listbox>
+    </div>
+    
     <div class="info-item"><strong>Created At:</strong> {{ admin.createdAt | date: 'medium' }}</div>
     <div class="info-item"><strong>Updated At:</strong> {{ admin.updatedAt | date: 'medium' }}</div>
     <div class="info-item"><strong>Last Login:</strong> {{ admin.lastLoginAt | date: 'medium' }}</div>
